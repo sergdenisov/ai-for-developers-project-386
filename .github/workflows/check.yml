@@ -45,3 +45,6 @@ jobs:
           fi
 
       - run: mise run check
+        env:
+          # lychee uses it to avoid GitHub rate limits on links.
+          GITHUB_TOKEN: ${{ github.token }}

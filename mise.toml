@@ -7,7 +7,9 @@ _.path = ["{{config_root}}/node_modules/.bin"]
 betterleaks = "1.9.0"
 hk = { version = "2.9.0", workflow = "release.yml" }
 jactionlint = { version = "2.3.0", workflow = "release.yaml" }
+lychee = "0.24.2"
 node = "24.18.0"
+osv-scanner = "2.7.0"
 pkl = "0.32.2"
 rumdl = "0.3.1"
 shellcheck = "0.11.0"
@@ -24,6 +26,11 @@ run = "hk check --all"
 [tasks."check:secrets"]
 description = "Scan the git history for committed secrets"
 run = "betterleaks git --redact --no-banner"
+
+# lychee skips frontend/index.html: its root-relative paths (/favicon.svg) are served by Vite from frontend/public.
+[tasks."check:network"]
+description = "Checks that need the network: known vulnerabilities in lockfiles, broken links"
+run = ["osv-scanner scan source -r .", "lychee --no-progress --exclude-path frontend/index.html ."]
 
 [tasks."check:types"]
 description = "Type-check backend and frontend"
@@ -47,7 +54,7 @@ depends = ["check:types", "check:unused", "check:test"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:hk", "check:secrets", "check:project", "check:build"]
+depends = ["check:hk", "check:secrets", "check:network", "check:project", "check:build"]
 
 [tasks.fix]
 description = "Apply safe autofixes"
