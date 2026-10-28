@@ -1,12 +1,11 @@
 # Календарь звонков
 
-
 [![hexlet-check](https://github.com/sergdenisov/ai-for-developers-project-386/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/sergdenisov/ai-for-developers-project-386/actions)
 
 Разработайте совместно с ИИ сервис для бронирования календаря
 
-Учебный проект Хекслета: https://ru.hexlet.io/programs/ai-for-developers
-Как это должно работать: https://files.hexlet.app/a/2ipc5m
+Учебный проект Хекслета: <https://ru.hexlet.io/programs/ai-for-developers>
+Как это должно работать: <https://files.hexlet.app/a/2ipc5m>
 
 ## Стек
 
@@ -63,7 +62,7 @@ npm run preview   # просмотр собранной версии
 
 Сообщения коммитов пишем по [Conventional Commits](https://www.conventionalcommits.org/ru/v1.0.0/):
 
-```
+```text
 <тип>(<область>): <описание>
 ```
 
@@ -73,7 +72,7 @@ npm run preview   # просмотр собранной версии
 
 Примеры:
 
-```
+```text
 feat(backend): add event types endpoint
 fix(frontend): show validation error on booking form
 docs: describe commit conventions
@@ -120,10 +119,12 @@ docs: describe commit conventions
 <details>
 <summary>Автоматические тесты Хекслета</summary>
 
-Тесты запускаются на каждый коммит. За запуск отвечает файл `.github/workflows/hexlet-check.yml` — не удаляйте и не переименовывайте ни его, ни репозиторий.
+Тесты запускаются на каждый коммит. За запуск отвечает файл `.github/workflows/hexlet-check.yml` — не удаляйте
+и не переименовывайте ни его, ни репозиторий.
 
 </details>
 
 ## О Хекслете
 
-[Хекслет](https://ru.hexlet.io/) — школа программирования: авторские программы обучения с практикой, поддержкой наставников и реальными проектами, которые остаются в резюме. Этот репозиторий — один из таких проектов.
+[Хекслет](https://ru.hexlet.io/) — школа программирования: авторские программы обучения с практикой, поддержкой
+наставников и реальными проектами, которые остаются в резюме. Этот репозиторий — один из таких проектов.

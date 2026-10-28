@@ -18,6 +18,10 @@ local linters = new Mapping<String, Step> {
   ["jactionlint"] = Builtins.jactionlint
   // Secrets in changed files; the whole git history is scanned by `mise run check:secrets`.
   ["betterleaks"] = Builtins.betterleaks
+  ["typos"] = Builtins.typos
+  // Markdown lint and format; settings and exclusions are in .rumdl.toml.
+  ["rumdl"] = Builtins.rumdl
+  ["rumdl-format"] = Builtins.rumdl_format
 }
 
 hooks {
