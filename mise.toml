@@ -19,6 +19,10 @@ run = "npx oxlint --deny-warnings --report-unused-disable-directives"
 description = "Type-check backend and frontend"
 run = ["npm run typecheck --prefix backend", "npm run typecheck --prefix frontend"]
 
+[tasks."check:unused"]
+description = "Find unused files, exports and dependencies"
+run = ["npx knip", "npx knip --directory backend", "npx knip --directory frontend"]
+
 [tasks."check:test"]
 description = "Run tests"
 run = "npm test --prefix backend"
@@ -29,7 +33,7 @@ run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:format", "check:lint", "check:types", "check:test", "check:build"]
+depends = ["check:format", "check:lint", "check:types", "check:unused", "check:test", "check:build"]
 
 [tasks.fix]
 description = "Apply safe autofixes"
