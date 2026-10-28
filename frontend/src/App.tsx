@@ -1,6 +1,6 @@
-import '@mantine/core/styles.css'
+import '@mantine/core/styles.css';
 
-import { Button, Container, MantineProvider, Stack, Text, Title } from '@mantine/core'
+import { Button, Container, MantineProvider, Stack, Text, Title } from '@mantine/core';
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         </Stack>
       </Container>
     </MantineProvider>
-  )
+  );
 }
 
-export default App
+export default App;

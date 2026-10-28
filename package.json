@@ -1,0 +1,10 @@
+{
+  "name": "ai-for-developers-project-386",
+  "private": true,
+  "description": "Repository-wide tooling: linters, formatters, commit checks",
+  "type": "module",
+  "devDependencies": {
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0"
+  }
+}

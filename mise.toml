@@ -5,17 +5,15 @@ node = "24.18.0"
 
 [tasks.install]
 description = "Install npm dependencies of every package"
-run = [
-  "npm ci --prefix backend",
-  "npm ci --prefix frontend",
-]
+run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend"]
+
+[tasks."check:format"]
+description = "Check formatting"
+run = "npx oxfmt --check"
 
 [tasks."check:types"]
 description = "Type-check backend and frontend"
-run = [
-  "npm run typecheck --prefix backend",
-  "npm run typecheck --prefix frontend",
-]
+run = ["npm run typecheck --prefix backend", "npm run typecheck --prefix frontend"]
 
 [tasks."check:test"]
 description = "Run tests"
@@ -23,11 +21,12 @@ run = "npm test --prefix backend"
 
 [tasks."check:build"]
 description = "Build backend and frontend"
-run = [
-  "npm run build --prefix backend",
-  "npm run build --prefix frontend",
-]
+run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:types", "check:test", "check:build"]
+depends = ["check:format", "check:types", "check:test", "check:build"]
+
+[tasks.fix]
+description = "Apply safe autofixes"
+run = "npx oxfmt"
