@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "react", "jsx-a11y", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "env": {
+    "builtin": true
+  },
+  "rules": {
+    // The frontend uses the automatic JSX runtime ("jsx": "react-jsx"), so React does not need to be in scope.
+    "react/react-in-jsx-scope": "off",
+    // Side-effect imports are allowed only for stylesheets (Mantine styles).
+    "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }]
+  }
+}

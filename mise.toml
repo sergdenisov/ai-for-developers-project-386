@@ -1,0 +1,62 @@
+min_version = "2026.10.17"
+
+[env]
+_.path = ["{{config_root}}/node_modules/.bin"]
+
+[tools]
+betterleaks = "1.9.0"
+"github:agent-sh/agnix" = "0.59.3"
+hk = { version = "2.9.0", workflow = "release.yml" }
+jactionlint = { version = "2.3.0", workflow = "release.yaml" }
+lychee = "0.24.2"
+node = "24.18.0"
+osv-scanner = "2.7.0"
+pkl = "0.32.2"
+rumdl = "0.3.1"
+shellcheck = "0.11.0"
+typos = "1.51.1"
+
+[tasks.install]
+description = "Install npm dependencies of every package and git hooks"
+run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend", "hk install --mise"]
+
+[tasks."check:hk"]
+description = "Linters and formatters (the same steps as the git hooks)"
+run = "hk check --all"
+
+[tasks."check:secrets"]
+description = "Scan the git history for committed secrets"
+run = "betterleaks git --redact --no-banner"
+
+# lychee skips frontend/index.html: its root-relative paths (/favicon.svg) are served by Vite from frontend/public.
+[tasks."check:network"]
+description = "Checks that need the network: known vulnerabilities in lockfiles, broken links"
+run = ["osv-scanner scan source -r .", "lychee --no-progress --exclude-path frontend/index.html ."]
+
+[tasks."check:types"]
+description = "Type-check backend and frontend"
+run = ["npm run typecheck --prefix backend", "npm run typecheck --prefix frontend"]
+
+[tasks."check:unused"]
+description = "Find unused files, exports and dependencies"
+run = ["knip", "knip --directory backend", "knip --directory frontend"]
+
+[tasks."check:test"]
+description = "Run tests"
+run = "npm test --prefix backend"
+
+[tasks."check:build"]
+description = "Build backend and frontend"
+run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
+
+[tasks."check:project"]
+description = "Whole-project checks: types, unused code, tests"
+depends = ["check:types", "check:unused", "check:test"]
+
+[tasks.check]
+description = "Run every check (CI runs the same command)"
+depends = ["check:hk", "check:secrets", "check:network", "check:project", "check:build"]
+
+[tasks.fix]
+description = "Apply safe autofixes"
+run = "hk fix --all"
