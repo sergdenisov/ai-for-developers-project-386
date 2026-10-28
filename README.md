@@ -12,6 +12,7 @@
 
 - **Контракт API:** TypeSpec → OpenAPI → клиентский SDK (`@hey-api/openapi-ts`)
 - **Бэкенд:** Node.js 24, TypeScript, Fastify 5, хранение данных в памяти процесса
+  - Тесты: Vitest
 - **Фронтенд:** React 19, TypeScript, Vite
   - UI: Mantine 9 (`@mantine/core`, `@mantine/dates`, `@mantine/form`, `@mantine/notifications`)
   - Запросы к API: сгенерированный SDK + TanStack Query 5
@@ -38,6 +39,7 @@ npm install
 npm run dev     # запуск в режиме разработки с перезапуском при изменениях
 npm run build   # сборка в dist/
 npm start       # запуск собранной версии
+npm test        # запуск тестов
 ```
 
 Переменные окружения: `PORT` (по умолчанию `3000`), `HOST` (по умолчанию `0.0.0.0`).
