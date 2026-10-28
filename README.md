@@ -29,8 +29,9 @@
 git clone https://github.com/sergdenisov/ai-for-developers-project-386.git
 cd ai-for-developers-project-386
 mise install       # Node.js и инструменты проверки
-mise run install   # npm-зависимости всех пакетов
+mise run install   # npm-зависимости всех пакетов и git-хуки
 mise run check     # все проверки, как в CI
+mise run fix       # безопасные автоисправления (форматирование и т. п.)
 ```
 
 ### Бэкенд

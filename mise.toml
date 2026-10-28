@@ -1,19 +1,20 @@
 min_version = "2026.10.17"
 
+[env]
+_.path = ["{{config_root}}/node_modules/.bin"]
+
 [tools]
+hk = { version = "2.9.0", workflow = "release.yml" }
 node = "24.18.0"
+pkl = "0.32.2"
 
 [tasks.install]
-description = "Install npm dependencies of every package"
-run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend"]
+description = "Install npm dependencies of every package and git hooks"
+run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend", "hk install --mise"]
 
-[tasks."check:format"]
-description = "Check formatting"
-run = "npx oxfmt --check"
-
-[tasks."check:lint"]
-description = "Lint JavaScript and TypeScript"
-run = "npx oxlint --deny-warnings --report-unused-disable-directives"
+[tasks."check:hk"]
+description = "Linters and formatters (the same steps as the git hooks)"
+run = "hk check --all"
 
 [tasks."check:types"]
 description = "Type-check backend and frontend"
@@ -21,7 +22,7 @@ run = ["npm run typecheck --prefix backend", "npm run typecheck --prefix fronten
 
 [tasks."check:unused"]
 description = "Find unused files, exports and dependencies"
-run = ["npx knip", "npx knip --directory backend", "npx knip --directory frontend"]
+run = ["knip", "knip --directory backend", "knip --directory frontend"]
 
 [tasks."check:test"]
 description = "Run tests"
@@ -31,10 +32,14 @@ run = "npm test --prefix backend"
 description = "Build backend and frontend"
 run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
 
+[tasks."check:project"]
+description = "Whole-project checks: types, unused code, tests"
+depends = ["check:types", "check:unused", "check:test"]
+
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:format", "check:lint", "check:types", "check:unused", "check:test", "check:build"]
+depends = ["check:hk", "check:project", "check:build"]
 
 [tasks.fix]
 description = "Apply safe autofixes"
-run = ["npx oxlint --fix", "npx oxfmt"]
+run = "hk fix --all"
