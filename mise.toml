@@ -11,6 +11,10 @@ run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend"]
 description = "Check formatting"
 run = "npx oxfmt --check"
 
+[tasks."check:lint"]
+description = "Lint JavaScript and TypeScript"
+run = "npx oxlint --deny-warnings --report-unused-disable-directives"
+
 [tasks."check:types"]
 description = "Type-check backend and frontend"
 run = ["npm run typecheck --prefix backend", "npm run typecheck --prefix frontend"]
@@ -25,8 +29,8 @@ run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:format", "check:types", "check:test", "check:build"]
+depends = ["check:format", "check:lint", "check:types", "check:test", "check:build"]
 
 [tasks.fix]
 description = "Apply safe autofixes"
-run = "npx oxfmt"
+run = ["npx oxlint --fix", "npx oxfmt"]
