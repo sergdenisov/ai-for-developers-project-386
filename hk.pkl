@@ -14,6 +14,8 @@ local linters = new Mapping<String, Step> {
   ["oxlint"] = (Builtins.ox_lint) {
     check = "oxlint --deny-warnings --report-unused-disable-directives {{files}}"
   }
+  // GitHub Actions workflows and dependabot.yml; also runs ShellCheck on `run:` steps.
+  ["jactionlint"] = Builtins.jactionlint
 }
 
 hooks {
