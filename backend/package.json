@@ -4,9 +4,9 @@
   "description": "Call calendar backend",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc",
     "test": "vitest run"
   },
   "type": "module",

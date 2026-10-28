@@ -23,11 +23,14 @@
 
 ## Установка
 
-Требуется Node.js 24+.
+Версии Node.js и инструментов проверки закреплены в `mise.toml`. Нужен [mise](https://mise.jdx.dev/getting-started.html).
 
 ```bash
 git clone https://github.com/sergdenisov/ai-for-developers-project-386.git
 cd ai-for-developers-project-386
+mise install       # Node.js и инструменты проверки
+mise run install   # npm-зависимости всех пакетов
+mise run check     # все проверки, как в CI
 ```
 
 ### Бэкенд
