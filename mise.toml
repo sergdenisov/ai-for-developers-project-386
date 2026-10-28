@@ -1,7 +1,14 @@
 min_version = "2026.10.17"
 
+[settings]
+# Required for [daemons].
+experimental = true
+
 [env]
 _.path = ["{{config_root}}/node_modules/.bin"]
+# Dev server ports; keep in sync with ready_port of the daemons below.
+BACKEND_PORT = "3000"
+FRONTEND_PORT = "5173"
 
 [tools]
 betterleaks = "1.9.0"
@@ -11,14 +18,47 @@ jactionlint = { version = "2.3.0", workflow = "release.yaml" }
 lychee = "0.24.2"
 node = "24.18.0"
 osv-scanner = "2.7.0"
+pitchfork = "2.32.3"
 pkl = "0.32.2"
 rumdl = "0.3.1"
 shellcheck = "0.11.0"
 typos = "1.51.1"
 
+[hooks]
+# `mise install` also installs npm dependencies and git hooks.
+postinstall = { task = "install" }
+
 [tasks.install]
 description = "Install npm dependencies of every package and git hooks"
 run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend", "hk install --mise"]
+
+[tasks."dev:backend"]
+description = "Backend dev server with reload on change"
+dir = "backend"
+env = { PORT = "{{env.BACKEND_PORT}}", HOST = "127.0.0.1" }
+run = "npm run dev"
+
+[tasks."dev:frontend"]
+description = "Frontend dev server (Vite)"
+dir = "frontend"
+# Bind to IPv4: on macOS `localhost` is ::1, and the daemon's ready_port check would never pass.
+run = "npm run dev -- --host 127.0.0.1 --port {{env.FRONTEND_PORT}} --strictPort"
+
+[tasks.dev]
+description = "Start backend and frontend dev servers in the background; stop with `mise daemons stop`"
+daemons = true
+run = "mise daemons ls"
+
+[tasks.build]
+description = "Build backend and frontend"
+run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
+
+[tasks.start]
+description = "Run the built backend"
+dir = "backend"
+depends = ["build"]
+env = { PORT = "{{env.BACKEND_PORT}}" }
+run = "npm start"
 
 [tasks."check:hk"]
 description = "Linters and formatters (the same steps as the git hooks)"
@@ -45,18 +85,24 @@ run = ["knip", "knip --directory backend", "knip --directory frontend"]
 description = "Run tests"
 run = "npm test --prefix backend"
 
-[tasks."check:build"]
-description = "Build backend and frontend"
-run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
-
 [tasks."check:project"]
 description = "Whole-project checks: types, unused code, tests"
 depends = ["check:types", "check:unused", "check:test"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:hk", "check:secrets", "check:network", "check:project", "check:build"]
+depends = ["check:hk", "check:secrets", "check:network", "check:project", "build"]
 
 [tasks.fix]
 description = "Apply safe autofixes"
 run = "hk fix --all"
+
+# Dev servers supervised by pitchfork: mise daemons start | stop | status | logs.
+[daemons.backend]
+task = "dev:backend"
+ready_port = 3000
+
+[daemons.frontend]
+task = "dev:frontend"
+ready_port = 5173
+depends = ["backend"]

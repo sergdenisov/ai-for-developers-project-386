@@ -14,6 +14,12 @@ packages; the root `package.json` holds repository-wide tooling only.
 - Tool versions are pinned in `mise.toml`; git hooks are defined in `hk.pkl`.
 - Do not bypass hooks with `--no-verify`.
 
+## Dev servers
+
+- Start the backend and frontend dev servers with `mise run dev`; they run as mise daemons (pitchfork).
+- Use `mise daemons status`, `mise daemons logs <name>`, `mise daemons restart <name>` and `mise daemons stop`
+  instead of starting servers in your own shell. Daemons: `backend`, `frontend`.
+
 ## Rules and exceptions
 
 - Never disable a lint rule or weaken a check to get a change through.

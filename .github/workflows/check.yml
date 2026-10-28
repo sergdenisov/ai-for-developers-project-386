@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # The postinstall hook would run `mise run install` inside mise-action; CI runs it as an explicit step.
+  MISE_NO_HOOKS: 1
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

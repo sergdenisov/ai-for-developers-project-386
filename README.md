@@ -22,41 +22,34 @@
 
 ## Установка
 
-Версии Node.js и инструментов проверки закреплены в `mise.toml`. Нужен [mise](https://mise.jdx.dev/getting-started.html).
+Всё окружение описано в `mise.toml`: версии инструментов, переменные окружения, задачи и фоновые dev-серверы.
+Нужен [mise](https://mise.jdx.dev/getting-started.html).
 
 ```bash
 git clone https://github.com/sergdenisov/ai-for-developers-project-386.git
 cd ai-for-developers-project-386
-mise install       # Node.js и инструменты проверки
-mise run install   # npm-зависимости всех пакетов и git-хуки
-mise run check     # все проверки, как в CI
-mise run fix       # безопасные автоисправления (форматирование и т. п.)
+mise install   # инструменты, а через хук postinstall — npm-зависимости и git-хуки
 ```
 
-### Бэкенд
+### Разработка
 
 ```bash
-cd backend
-npm install
+mise run dev                  # бэкенд (http://127.0.0.1:3000) и фронтенд (http://127.0.0.1:5173) в фоне
+mise daemons status           # состояние dev-серверов
+mise daemons logs backend     # логи (backend или frontend)
+mise daemons restart frontend # перезапуск
+mise daemons stop             # остановить всё
 
-npm run dev     # запуск в режиме разработки с перезапуском при изменениях
-npm run build   # сборка в dist/
-npm start       # запуск собранной версии
-npm test        # запуск тестов
+mise run check   # все проверки, как в CI
+mise run fix     # безопасные автоисправления (форматирование и т. п.)
+mise run build   # сборка бэкенда и фронтенда
+mise run start   # сборка и запуск собранного бэкенда
+mise tasks       # все задачи
 ```
 
-Переменные окружения: `PORT` (по умолчанию `3000`), `HOST` (по умолчанию `0.0.0.0`).
-
-### Фронтенд
-
-```bash
-cd frontend
-npm install
-
-npm run dev       # dev-сервер на http://localhost:5173
-npm run build     # проверка типов и сборка в dist/
-npm run preview   # просмотр собранной версии
-```
+Dev-серверы работают как daemons mise под управлением [pitchfork](https://pitchfork.jdx.dev/), поэтому их можно
+запускать, останавливать и смотреть их состояние из любого терминала. Порты задаются в `mise.toml`
+(`BACKEND_PORT`, `FRONTEND_PORT`).
 
 ## Коммиты
 
@@ -109,12 +102,6 @@ docs: describe commit conventions
 выбранное время и длительность).
 10. Указывает их и нажимает на кнопку "Подтвердить запись".
 11. Видит надпись "Запись подтверждена" и кнопку "Записаться еще" (которая возвращает к шагу 5).
-
-## Использование
-
-<!-- Добавьте примеры запуска и запись asciinema — именно это смотрит работодатель -->
-
----
 
 <details>
 <summary>Автоматические тесты Хекслета</summary>

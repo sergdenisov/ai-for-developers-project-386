@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # Skip the postinstall hook (`mise run install`): network checks need no npm dependencies.
+  MISE_NO_HOOKS: 1
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
