@@ -5,6 +5,7 @@ _.path = ["{{config_root}}/node_modules/.bin"]
 
 [tools]
 betterleaks = "1.9.0"
+"github:agent-sh/agnix" = "0.59.3"
 hk = { version = "2.9.0", workflow = "release.yml" }
 jactionlint = { version = "2.3.0", workflow = "release.yaml" }
 lychee = "0.24.2"

@@ -22,6 +22,11 @@ local linters = new Mapping<String, Step> {
   // Markdown lint and format; settings and exclusions are in .rumdl.toml.
   ["rumdl"] = Builtins.rumdl
   ["rumdl-format"] = Builtins.rumdl_format
+  // Agent instruction files; --strict makes warnings fail too.
+  ["agnix"] {
+    glob = List("AGENTS.md", "CLAUDE.md", "**/AGENTS.md", "**/CLAUDE.md", ".claude/**")
+    check = "agnix --strict {{files}}"
+  }
 }
 
 hooks {
