@@ -13,6 +13,11 @@
 - **Контракт API:** TypeSpec → OpenAPI → клиентский SDK (`@hey-api/openapi-ts`)
 - **Бэкенд:** Node.js 24, TypeScript, Fastify 5, хранение данных в памяти процесса
 - **Фронтенд:** React 19, TypeScript, Vite
+  - UI: Mantine 9 (`@mantine/core`, `@mantine/dates`, `@mantine/form`, `@mantine/notifications`)
+  - Запросы к API: сгенерированный SDK + TanStack Query 5
+  - Роутинг: React Router
+  - Даты: dayjs
+  - Тесты: Vitest + Testing Library, Playwright
 - **Деплой:** Docker
 
 ## Установка
@@ -36,6 +41,17 @@ npm start       # запуск собранной версии
 ```
 
 Переменные окружения: `PORT` (по умолчанию `3000`), `HOST` (по умолчанию `0.0.0.0`).
+
+### Фронтенд
+
+```bash
+cd frontend
+npm install
+
+npm run dev       # dev-сервер на http://localhost:5173
+npm run build     # проверка типов и сборка в dist/
+npm run preview   # просмотр собранной версии
+```
 
 ## Коммиты
 
