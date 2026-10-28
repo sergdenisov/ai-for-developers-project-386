@@ -19,6 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
@@ -26,5 +27,21 @@ jobs:
           version: 2026.10.21
 
       - run: mise run install
+
+      - name: Check commit messages
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.event.after }}
+        run: |
+          if [ "$EVENT_NAME" = pull_request ]; then
+            npx commitlint --from "$PR_BASE" --to "$PR_HEAD" --verbose
+          elif [ "$PUSH_BEFORE" = 0000000000000000000000000000000000000000 ]; then
+            npx commitlint --last --verbose
+          else
+            npx commitlint --from "$PUSH_BEFORE" --to "$PUSH_AFTER" --verbose
+          fi
 
       - run: mise run check

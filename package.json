@@ -4,6 +4,8 @@
   "description": "Repository-wide tooling: linters, formatters, commit checks",
   "type": "module",
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "knip": "^6.43.0",
     "oxfmt": "^0.75.0",
     "oxlint": "^1.90.0"
