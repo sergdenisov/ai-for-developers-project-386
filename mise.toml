@@ -4,6 +4,7 @@ min_version = "2026.10.17"
 _.path = ["{{config_root}}/node_modules/.bin"]
 
 [tools]
+betterleaks = "1.9.0"
 hk = { version = "2.9.0", workflow = "release.yml" }
 jactionlint = { version = "2.3.0", workflow = "release.yaml" }
 node = "24.18.0"
@@ -17,6 +18,10 @@ run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend", "hk inst
 [tasks."check:hk"]
 description = "Linters and formatters (the same steps as the git hooks)"
 run = "hk check --all"
+
+[tasks."check:secrets"]
+description = "Scan the git history for committed secrets"
+run = "betterleaks git --redact --no-banner"
 
 [tasks."check:types"]
 description = "Type-check backend and frontend"
@@ -40,7 +45,7 @@ depends = ["check:types", "check:unused", "check:test"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:hk", "check:project", "check:build"]
+depends = ["check:hk", "check:secrets", "check:project", "check:build"]
 
 [tasks.fix]
 description = "Apply safe autofixes"

@@ -16,6 +16,8 @@ local linters = new Mapping<String, Step> {
   }
   // GitHub Actions workflows and dependabot.yml; also runs ShellCheck on `run:` steps.
   ["jactionlint"] = Builtins.jactionlint
+  // Secrets in changed files; the whole git history is scanned by `mise run check:secrets`.
+  ["betterleaks"] = Builtins.betterleaks
 }
 
 hooks {
