@@ -83,7 +83,7 @@ run = ["knip", "knip --directory backend", "knip --directory frontend"]
 
 [tasks."check:test"]
 description = "Run tests"
-run = "npm test --prefix backend"
+run = ["npm test --prefix backend", "npm test --prefix frontend"]
 
 [tasks."check:project"]
 description = "Whole-project checks: types, unused code, tests"
