@@ -31,6 +31,24 @@ export function formatDate(date: string) {
   return dayjs(date).locale('ru').format('D MMMM');
 }
 
+/** The short date of the moment in the zone, for tables: `2 нояб.`. */
+function formatShortDate(moment: string, timeZone: string) {
+  return dayjs(moment).tz(timeZone).locale('ru').format('D MMM');
+}
+
+/** A moment in the zone for tables, where the zone is in the column header: `30 окт., 18:45`. */
+export function formatShortMoment(moment: string, timeZone: string) {
+  return `${formatShortDate(moment, timeZone)}, ${formatTime(moment, timeZone)}`;
+}
+
+/** A Slot in the zone for tables, where the zone is in the column header: `2 нояб., 10:00–10:30`. */
+export function formatShortSlot(
+  { startsAt, endsAt }: { startsAt: string; endsAt: string },
+  timeZone: string,
+) {
+  return `${formatShortMoment(startsAt, timeZone)}–${formatTime(endsAt, timeZone)}`;
+}
+
 /** A Slot for people, in the zone and labelled with it: `3 ноября, 10:00–10:30 МСК`. */
 export function formatSlot(
   { startsAt, endsAt }: { startsAt: string; endsAt: string },
