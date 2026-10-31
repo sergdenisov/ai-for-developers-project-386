@@ -1,6 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { bookingWindow, checkBooking, checkStart, freeSlots, overlaps } from '../src/schedule.js';
+import {
+  bookingWindow,
+  checkBooking,
+  checkStart,
+  freeSlots,
+  overlaps,
+  upcoming,
+} from '../src/schedule.js';
 
 /** 2 November 2026, 10:00 Moscow time. */
 const now = new Date('2026-11-02T10:00:00+03:00');
@@ -250,5 +257,34 @@ describe('checking a new Booking', () => {
         ],
       }),
     ).toBe('started');
+  });
+});
+
+/** A Booking named `id` from one Moscow wall time to another. */
+function namedBooking(id: string, startsAt: string, endsAt: string) {
+  return { id, startsAt: moscow(startsAt), endsAt: moscow(endsAt) };
+}
+
+describe('Upcoming Bookings', () => {
+  test('go nearest first and keep their own fields', () => {
+    const later = namedBooking('later', '2026-11-04T09:00:00', '2026-11-04T09:30:00');
+    const nearest = namedBooking('nearest', '2026-11-02T15:00:00', '2026-11-02T16:00:00');
+    const middle = namedBooking('middle', '2026-11-03T12:00:00', '2026-11-03T12:15:00');
+
+    expect(upcoming([later, nearest, middle], now).map(({ id }) => id)).toEqual([
+      'nearest',
+      'middle',
+      'later',
+    ]);
+  });
+
+  test('keep a call until the moment it ends, then drop it', () => {
+    const ended = namedBooking('ended', '2026-11-02T09:00:00', '2026-11-02T09:30:00');
+    const endsNow = namedBooking('ends-now', '2026-11-02T09:30:00', '2026-11-02T10:00:00');
+    const inProgress = namedBooking('in-progress', '2026-11-02T10:00:00', '2026-11-02T10:15:00');
+    const ids = (at: Date) => upcoming([ended, endsNow, inProgress], at).map(({ id }) => id);
+
+    expect(ids(now)).toEqual(['in-progress']);
+    expect(ids(moscow('2026-11-02T09:59:59.999'))).toEqual(['ends-now', 'in-progress']);
   });
 });

@@ -19,6 +19,8 @@ import type {
   GetOwnerResponses,
   ListEventTypesData,
   ListEventTypesResponses,
+  ListUpcomingData,
+  ListUpcomingResponses,
 } from './types.gen';
 
 export type Options<
@@ -38,6 +40,18 @@ export type Options<
    */
   meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Lists the Upcoming Bookings of every Event Type: those whose Slot has not ended yet, a call in progress included,
+ * nearest first.
+ */
+export const listUpcoming = <ThrowOnError extends boolean = false>(
+  options?: Options<ListUpcomingData, ThrowOnError>,
+): RequestResult<ListUpcomingResponses, unknown, ThrowOnError> =>
+  (options?.client ?? client).get<ListUpcomingResponses, unknown, ThrowOnError>({
+    url: '/bookings',
+    ...options,
+  });
 
 /**
  * Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid

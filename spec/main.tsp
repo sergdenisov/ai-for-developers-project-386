@@ -245,3 +245,11 @@ op createBooking(@body body: CreateBookingRequest):
   | ValidationFailedResponse
   | NotFoundResponse
   | ConflictResponse;
+
+/**
+ * Lists the Upcoming Bookings of every Event Type: those whose Slot has not ended yet, a call in progress included,
+ * nearest first.
+ */
+@route("/bookings")
+@get
+op listUpcoming(): Booking[];

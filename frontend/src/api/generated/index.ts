@@ -7,6 +7,7 @@ export {
   getFreeSlots,
   getOwner,
   listEventTypes,
+  listUpcoming,
   type Options,
 } from './sdk.gen';
 export type {
@@ -50,6 +51,9 @@ export type {
   ListEventTypesData,
   ListEventTypesResponse,
   ListEventTypesResponses,
+  ListUpcomingData,
+  ListUpcomingResponse,
+  ListUpcomingResponses,
   Moment,
   Owner,
   OwnerDate,

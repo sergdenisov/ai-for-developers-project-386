@@ -17,9 +17,13 @@ import type {
   GetFreeSlotsResponses,
   GetOwnerResponses,
   ListEventTypesResponses,
+  ListUpcomingResponses,
 } from './types.gen.js';
 
 export type RouteHandlers = {
+  listUpcoming: RouteHandler<{
+    Reply: ListUpcomingResponses;
+  }>;
   createBooking: RouteHandler<{
     Body: CreateBookingData['body'];
     Reply: CreateBookingErrors & CreateBookingResponses;

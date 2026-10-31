@@ -205,6 +205,22 @@ export type WorkingHours = {
   end: WallTime;
 };
 
+export type ListUpcomingData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/bookings';
+};
+
+export type ListUpcomingResponses = {
+  /**
+   * The request has succeeded.
+   */
+  200: Array<Booking>;
+};
+
+export type ListUpcomingResponse = ListUpcomingResponses[keyof ListUpcomingResponses];
+
 export type CreateBookingData = {
   body: CreateBookingRequest;
   path?: never;

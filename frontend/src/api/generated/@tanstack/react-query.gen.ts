@@ -10,6 +10,7 @@ import {
   getFreeSlots,
   getOwner,
   listEventTypes,
+  listUpcoming,
   type Options,
 } from '../sdk.gen';
 import type {
@@ -29,32 +30,9 @@ import type {
   GetOwnerResponse,
   ListEventTypesData,
   ListEventTypesResponse,
+  ListUpcomingData,
+  ListUpcomingResponse,
 } from '../types.gen';
-
-/**
- * Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid
- * within Working Hours and the Booking Window (`400` with `fields.startsAt`), a Slot that has started
- * (`409 SLOT_STARTED`), an overlap with a Booking of any Event Type (`409 SLOT_UNAVAILABLE`).
- */
-export const createBookingMutation = (
-  options?: Partial<Options<CreateBookingData>>,
-): UseMutationOptions<CreateBookingResponse, CreateBookingError, Options<CreateBookingData>> => {
-  const mutationOptions: UseMutationOptions<
-    CreateBookingResponse,
-    CreateBookingError,
-    Options<CreateBookingData>
-  > = {
-    mutationFn: async (fnOptions) => {
-      const { data } = await createBooking({
-        ...options,
-        ...fnOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
 
 export type QueryKey<TOptions extends Options> = [
   Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -93,6 +71,57 @@ const createQueryKey = <TOptions extends Options>(
     params.query = options.query;
   }
   return [params];
+};
+
+export const listUpcomingQueryKey = (options?: Options<ListUpcomingData>) =>
+  createQueryKey('listUpcoming', options);
+
+/**
+ * Lists the Upcoming Bookings of every Event Type: those whose Slot has not ended yet, a call in progress included,
+ * nearest first.
+ */
+export const listUpcomingOptions = (options?: Options<ListUpcomingData>) =>
+  queryOptions<
+    ListUpcomingResponse,
+    DefaultError,
+    ListUpcomingResponse,
+    ReturnType<typeof listUpcomingQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listUpcoming({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listUpcomingQueryKey(options),
+  });
+
+/**
+ * Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid
+ * within Working Hours and the Booking Window (`400` with `fields.startsAt`), a Slot that has started
+ * (`409 SLOT_STARTED`), an overlap with a Booking of any Event Type (`409 SLOT_UNAVAILABLE`).
+ */
+export const createBookingMutation = (
+  options?: Partial<Options<CreateBookingData>>,
+): UseMutationOptions<CreateBookingResponse, CreateBookingError, Options<CreateBookingData>> => {
+  const mutationOptions: UseMutationOptions<
+    CreateBookingResponse,
+    CreateBookingError,
+    Options<CreateBookingData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createBooking({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
 };
 
 export const listEventTypesQueryKey = (options?: Options<ListEventTypesData>) =>

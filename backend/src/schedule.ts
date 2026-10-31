@@ -30,6 +30,16 @@ export function overlaps(a: Interval, b: Interval): boolean {
   return a.startsAt.getTime() < b.endsAt.getTime() && b.startsAt.getTime() < a.endsAt.getTime();
 }
 
+/**
+ * The Upcoming Bookings among `bookings`, nearest first: those that have not ended, a call in progress included. A
+ * Booking that ends exactly now has ended.
+ */
+export function upcoming<T extends Interval>(bookings: readonly T[], now: Date): T[] {
+  return bookings
+    .filter((booking) => booking.endsAt.getTime() > now.getTime())
+    .toSorted((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+}
+
 /** The days a Guest can book: today in the Owner Time Zone and the days after it. */
 export type BookingWindow = { firstDate: string; lastDate: string };
 

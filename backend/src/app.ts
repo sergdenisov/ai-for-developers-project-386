@@ -9,7 +9,7 @@ import { createEventTypeStore } from './event-types.js';
 import { formatOwnerInstant } from './owner-time.js';
 import { owner } from './owner.js';
 import { addResponseValidation } from './response-validation.js';
-import { freeSlots } from './schedule.js';
+import { freeSlots, upcoming } from './schedule.js';
 
 export type AppOptions = {
   logger?: boolean;
@@ -109,6 +109,8 @@ export function buildApp({
           return reply.code(409).send(apiError(outcome.code, outcome.message));
       }
     },
+    listUpcoming: async (_request, reply) =>
+      reply.code(200).send(upcoming(bookings.list(), now()).map(bookingResource)),
     createBooking: async (request, reply) => {
       const { eventTypeId, startsAt, guest } = request.body;
       const eventType = eventTypes.get(eventTypeId);
