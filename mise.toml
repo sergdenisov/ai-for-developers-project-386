@@ -30,7 +30,22 @@ postinstall = { task = "install" }
 
 [tasks.install]
 description = "Install npm dependencies of every package and git hooks"
-run = ["npm ci", "npm ci --prefix backend", "npm ci --prefix frontend", "hk install --mise"]
+run = [
+  "npm ci",
+  "npm ci --prefix spec",
+  "npm ci --prefix backend",
+  "npm ci --prefix frontend",
+  "hk install --mise",
+]
+
+# Contract chain: spec/main.tsp -> spec/openapi.yaml -> frontend SDK and backend types (docs/adr/0003).
+[tasks.generate]
+description = "Compile the TypeSpec contract to OpenAPI, then generate the frontend SDK and backend types from it"
+run = [
+  "npm run build --prefix spec",
+  "npm run generate --prefix backend",
+  "npm run generate --prefix frontend",
+]
 
 [tasks."dev:backend"]
 description = "Backend dev server with reload on change"
@@ -51,6 +66,8 @@ run = "mise daemons ls"
 
 [tasks.build]
 description = "Build backend and frontend"
+# `check:contract` rewrites the generated code; when both run, they must not overlap.
+wait_for = ["check:contract"]
 run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
 
 [tasks.start]
@@ -62,6 +79,7 @@ run = "npm start"
 
 [tasks."check:hk"]
 description = "Linters and formatters (the same steps as the git hooks)"
+wait_for = ["check:contract"]
 run = "hk check --all"
 
 [tasks."check:secrets"]
@@ -73,21 +91,39 @@ run = "betterleaks git --redact --no-banner"
 description = "Checks that need the network: known vulnerabilities in lockfiles, broken links"
 run = ["osv-scanner scan source -r .", "lychee --no-progress --exclude-path frontend/index.html ."]
 
+[tasks."check:contract"]
+description = "Fail if the committed OpenAPI, SDK or backend types differ from what the contract generates"
+depends = ["generate"]
+run = """
+paths='spec/openapi.yaml backend/src/api/generated frontend/src/api/generated'
+# --porcelain also lists new untracked files, which `git diff` misses.
+changes=$(git status --porcelain -- $paths)
+if [ -n "$changes" ]; then
+  echo "$changes"
+  git diff -- $paths
+  echo 'Generated files are out of date: run `mise run generate` and commit the result.' >&2
+  exit 1
+fi
+"""
+
 [tasks."check:types"]
 description = "Type-check backend and frontend"
+wait_for = ["check:contract"]
 run = ["npm run typecheck --prefix backend", "npm run typecheck --prefix frontend"]
 
 [tasks."check:unused"]
 description = "Find unused files, exports and dependencies"
+wait_for = ["check:contract"]
 run = ["knip", "knip --directory backend", "knip --directory frontend"]
 
 [tasks."check:test"]
 description = "Run tests"
+wait_for = ["check:contract"]
 run = ["npm test --prefix backend", "npm test --prefix frontend"]
 
 [tasks."check:project"]
-description = "Whole-project checks: types, unused code, tests"
-depends = ["check:types", "check:unused", "check:test"]
+description = "Whole-project checks: generated contract code, types, unused code, tests"
+depends = ["check:contract", "check:types", "check:unused", "check:test"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
