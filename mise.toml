@@ -41,11 +41,7 @@ run = [
 # Contract chain: spec/main.tsp -> spec/openapi.yaml -> frontend SDK and backend types (docs/adr/0003).
 [tasks.generate]
 description = "Compile the TypeSpec contract to OpenAPI, then generate the frontend SDK and backend types from it"
-run = [
-  "npm run build --prefix spec",
-  "npm run generate --prefix backend",
-  "npm run generate --prefix frontend",
-]
+run = "npm run generate --prefix spec"
 
 [tasks."dev:backend"]
 description = "Backend dev server with reload on change"

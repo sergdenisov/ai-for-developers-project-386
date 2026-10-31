@@ -1,7 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  // backend and frontend are separate packages, checked with `knip --directory`.
-  "ignore": ["backend/**", "frontend/**"],
+  // backend and frontend are separate packages, checked with `knip --directory`. spec is a separate package too;
+  // its only code is the generator config, and Knip cannot see the TypeSpec imports in main.tsp and tspconfig.yaml.
+  "ignore": ["backend/**", "frontend/**", "spec/**"],
   // Run by hk (hk.pkl), which Knip does not read.
   "ignoreDependencies": ["oxfmt", "oxlint"]
 }

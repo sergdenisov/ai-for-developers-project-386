@@ -12,6 +12,8 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 - Design first: change the API in `spec/main.tsp`, run `mise run generate` and commit the regenerated files with
   the change. It compiles `spec/openapi.yaml` (OpenAPI 3.0.0) and generates from it, with `@hey-api/openapi-ts`,
   the frontend SDK and the backend handler types.
+- The generator and its config (`spec/openapi-ts.config.ts`) live in the `spec` package with TypeScript 6: it needs
+  the TypeScript compiler API, which TypeScript 7 in `backend` and `frontend` does not ship.
 - Contract paths have no prefix; the backend serves them under `/api` (`fastify-openapi-glue`).
 - Backend: implement an operation in the `RouteHandlers` object in `backend/src/app.ts`; glue registers its route
   and validates requests from `backend/src/api/generated/openapi.json`.

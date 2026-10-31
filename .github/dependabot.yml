@@ -12,8 +12,8 @@ updates:
       prefix: chore
       include: scope
     groups:
-      # 0.x with breaking changes in minor versions, pinned to an exact version: update it on its own and
-      # regenerate the SDK and backend types (`mise run generate`).
+      # In /spec. 0.x with breaking changes in minor versions, pinned to an exact version: update it on its own
+      # and regenerate the SDK and backend types (`mise run generate`).
       hey-api:
         patterns: ['@hey-api/openapi-ts']
       npm-minor-and-patch:

@@ -5,14 +5,20 @@
   "description": "Call calendar API contract in TypeSpec",
   "type": "module",
   "scripts": {
-    "build": "tsp compile ."
+    "build": "tsp compile .",
+    "generate": "npm run build && openapi-ts"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
     "@typespec/compiler": "^1.17.0",
     "@typespec/http": "^1.17.0",
-    "@typespec/openapi3": "^1.17.0"
+    "@typespec/openapi3": "^1.17.0",
+    "typescript": "^6.0.3"
   },
   "overrides": {
+    "@hey-api/json-schema-ref-parser": {
+      "js-yaml": "^4.3.2"
+    },
     "@scalar/json-magic@0.13.5": {
       "undici": "^7.30.1"
     }
