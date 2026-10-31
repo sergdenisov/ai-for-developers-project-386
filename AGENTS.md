@@ -21,6 +21,9 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
   `useQuery` / `useMutation`.
 - API tests start the app with `buildApp({ validateResponses: true })`, which turns any response the contract does
   not declare into a 500.
+- Errors have one shape, `ApiError { code, message, fields? }`. Every operation declares its error responses in
+  `spec/main.tsp`; handlers answer them with `reply.code(N).send(apiError(...))` from `backend/src/errors.ts`, whose
+  error handler brings Fastify's own errors (request validation, unknown route, anything unexpected) to that shape.
 
 ## Checks
 
