@@ -37,6 +37,9 @@ packages; the root `package.json` holds repository-wide tooling only.
 Write commit messages in [Conventional Commits](https://www.conventionalcommits.org/) format; commitlint checks them
 in the `commit-msg` hook and in CI.
 
+A commit that implements a ticket ends its subject with the ticket number, e.g. `feat(frontend): book a free slot (#12)`;
+GitHub turns it into a link, so the history shows which commit did which ticket.
+
 ## Agent skills
 
 ### Issue tracker
