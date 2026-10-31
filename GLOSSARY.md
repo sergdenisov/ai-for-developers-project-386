@@ -16,8 +16,9 @@ _Avoid_: User, client, customer
 ## Calendar
 
 **Event Type**:
-A template for a call that Guests can book: a unique name, an optional description and a duration in multiples of
-15 minutes (UI: «Тип события»).
+A template for a call that Guests can book: a unique identifier that appears in its booking link, chosen by the Owner
+or assigned, a unique name, an optional description and a duration in multiples of 15 minutes that fits within
+Working Hours (UI: «Тип события»).
 _Avoid_: Event, meeting type, service
 
 **Booking**:
