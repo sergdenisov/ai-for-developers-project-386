@@ -1,8 +1,12 @@
 import { fireEvent, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { expect, test } from 'vitest';
+import { beforeEach, expect, test } from 'vitest';
 
-import type { ApiError, GetEventTypeResponse } from './api/generated/index.ts';
+import type {
+  ApiError,
+  GetEventTypeResponse,
+  GetFreeSlotsResponse,
+} from './api/generated/index.ts';
 import { renderApp } from './test/render-app.tsx';
 import { server } from './test/server.ts';
 
@@ -12,6 +16,19 @@ const introCall: GetEventTypeResponse = {
   description: 'Короткий звонок, чтобы познакомиться',
   durationMinutes: 30,
 };
+
+/** A Booking Window without Free Slots: these tests are about the page, not the calendar. */
+const noFreeSlots: GetFreeSlotsResponse = {
+  window: { firstDate: '2026-11-02', lastDate: '2026-11-15' },
+  days: Array.from({ length: 14 }, (_, index) => ({
+    date: `2026-11-${String(index + 2).padStart(2, '0')}`,
+    slots: [],
+  })),
+};
+
+beforeEach(() => {
+  server.use(http.get('*/api/event-types/:id/free-slots', () => HttpResponse.json(noFreeSlots)));
+});
 
 test('shows who the Guest books with and the name, description and duration of the Event Type', async () => {
   server.use(http.get('*/api/event-types/intro-call', () => HttpResponse.json(introCall)));
