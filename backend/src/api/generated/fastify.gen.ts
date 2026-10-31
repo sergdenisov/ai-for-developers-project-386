@@ -9,6 +9,9 @@ import type {
   GetEventTypeData,
   GetEventTypeErrors,
   GetEventTypeResponses,
+  GetFreeSlotsData,
+  GetFreeSlotsErrors,
+  GetFreeSlotsResponses,
   GetOwnerResponses,
   ListEventTypesResponses,
 } from './types.gen.js';
@@ -24,6 +27,10 @@ export type RouteHandlers = {
   getEventType: RouteHandler<{
     Params: GetEventTypeData['path'];
     Reply: GetEventTypeErrors & GetEventTypeResponses;
+  }>;
+  getFreeSlots: RouteHandler<{
+    Params: GetFreeSlotsData['path'];
+    Reply: GetFreeSlotsErrors & GetFreeSlotsResponses;
   }>;
   getOwner: RouteHandler<{
     Reply: GetOwnerResponses;

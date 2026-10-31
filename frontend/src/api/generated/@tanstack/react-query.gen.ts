@@ -3,7 +3,14 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { createEventType, getEventType, getOwner, listEventTypes, type Options } from '../sdk.gen';
+import {
+  createEventType,
+  getEventType,
+  getFreeSlots,
+  getOwner,
+  listEventTypes,
+  type Options,
+} from '../sdk.gen';
 import type {
   CreateEventTypeData,
   CreateEventTypeError,
@@ -11,6 +18,9 @@ import type {
   GetEventTypeData,
   GetEventTypeError,
   GetEventTypeResponse,
+  GetFreeSlotsData,
+  GetFreeSlotsError,
+  GetFreeSlotsResponse,
   GetOwnerData,
   GetOwnerResponse,
   ListEventTypesData,
@@ -131,6 +141,31 @@ export const getEventTypeOptions = (options: Options<GetEventTypeData>) =>
       return data;
     },
     queryKey: getEventTypeQueryKey(options),
+  });
+
+export const getFreeSlotsQueryKey = (options: Options<GetFreeSlotsData>) =>
+  createQueryKey('getFreeSlots', options);
+
+/**
+ * Returns the Free Slots of an Event Type on every day of the Booking Window: a snapshot that is not cached.
+ */
+export const getFreeSlotsOptions = (options: Options<GetFreeSlotsData>) =>
+  queryOptions<
+    GetFreeSlotsResponse,
+    GetFreeSlotsError,
+    GetFreeSlotsResponse,
+    ReturnType<typeof getFreeSlotsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getFreeSlots({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getFreeSlotsQueryKey(options),
   });
 
 export const getOwnerQueryKey = (options?: Options<GetOwnerData>) =>

@@ -21,6 +21,11 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
   `useQuery` / `useMutation`.
 - API tests start the app with `buildApp({ validateResponses: true })`, which turns any response the contract does
   not declare into a 500.
+- The clock is a seam: `buildApp({ now })` takes a `() => Date`, the system clock by default. API tests pass a fixed
+  moment and move it; code reads the current moment only through `now`.
+- Scheduling rules (Working Hours, Slot Grid, Booking Window, Free Slots) live in `backend/src/schedule.ts`, pure
+  functions that take `now` as an argument; handlers call it and format moments with `formatOwnerInstant` from
+  `backend/src/owner-time.ts` (`+03:00`, whole seconds). Unit-test new rules there.
 - Errors have one shape, `ApiError { code, message, fields? }`. Every operation declares its error responses in
   `spec/main.tsp`; handlers answer them with `reply.code(N).send(apiError(...))` from `backend/src/errors.ts`, whose
   error handler brings Fastify's own errors (request validation, unknown route, anything unexpected) to that shape.

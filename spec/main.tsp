@@ -140,3 +140,49 @@ op createEventType(@body body: CreateEventTypeRequest):
     }
   | ValidationFailedResponse
   | ConflictResponse;
+
+/** A calendar day `YYYY-MM-DD` in the Owner Time Zone. */
+scalar OwnerDate extends plainDate;
+
+/**
+ * A moment as RFC 3339. Responses give it in the Owner Time Zone to whole seconds, `2026-11-02T10:00:00+03:00`;
+ * requests may use any offset, but must have one.
+ */
+scalar Moment extends offsetDateTime;
+
+/** A period of an Event Type's duration on the Slot Grid within Working Hours; half-open, `[startsAt, endsAt)`. */
+model Slot {
+  startsAt: Moment;
+  endsAt: Moment;
+}
+
+/** The days a Guest can book: today in the Owner Time Zone and the days after it. */
+model BookingWindow {
+  firstDate: OwnerDate;
+  lastDate: OwnerDate;
+}
+
+/** The Free Slots of one day, ordered by start; empty when the day has none. */
+model FreeSlotsDay {
+  date: OwnerDate;
+  slots: Slot[];
+}
+
+/** The Free Slots of an Event Type over the Booking Window. */
+model FreeSlots {
+  window: BookingWindow;
+
+  /** Every day of the window in order, days without Free Slots included. */
+  days: FreeSlotsDay[];
+}
+
+/** Returns the Free Slots of an Event Type on every day of the Booking Window: a snapshot that is not cached. */
+@route("/event-types/{id}/free-slots")
+@get
+op getFreeSlots(@path id: string):
+  | {
+      @statusCode statusCode: 200;
+      @header("Cache-Control") cacheControl: "no-store";
+      @body body: FreeSlots;
+    }
+  | NotFoundResponse;

@@ -5,16 +5,24 @@ import type { RouteHandlers } from './api/generated/fastify.gen.js';
 import specification from './api/generated/openapi.json' with { type: 'json' };
 import { addErrorHandling, apiError, validationFailed } from './errors.js';
 import { createEventTypeStore } from './event-types.js';
+import { formatOwnerInstant } from './owner-time.js';
 import { owner } from './owner.js';
 import { addResponseValidation } from './response-validation.js';
+import { freeSlots } from './schedule.js';
 
 export type AppOptions = {
   logger?: boolean;
   /** Check every response against the contract; for tests. */
   validateResponses?: boolean;
+  /** The clock: the current moment. Tests pass a fixed one they can move; the default is the system clock. */
+  now?: () => Date;
 };
 
-export function buildApp({ logger = false, validateResponses = false }: AppOptions = {}) {
+export function buildApp({
+  logger = false,
+  validateResponses = false,
+  now = () => new Date(),
+}: AppOptions = {}) {
   const fastify = Fastify({
     logger,
     ajv: {
@@ -44,6 +52,30 @@ export function buildApp({ logger = false, validateResponses = false }: AppOptio
       return eventType === undefined
         ? reply.code(404).send(apiError('NOT_FOUND', 'Тип события не найден'))
         : reply.code(200).send(eventType);
+    },
+    getFreeSlots: async (request, reply) => {
+      const eventType = eventTypes.get(request.params.id);
+      if (eventType === undefined) {
+        return reply.code(404).send(apiError('NOT_FOUND', 'Тип события не найден'));
+      }
+      const { window, days } = freeSlots({
+        now: now(),
+        durationMinutes: eventType.durationMinutes,
+      });
+      // A snapshot of the moment: a Slot may start or be booked right after it.
+      return reply
+        .header('cache-control', 'no-store')
+        .code(200)
+        .send({
+          window,
+          days: days.map(({ date, slots }) => ({
+            date,
+            slots: slots.map(({ startsAt, endsAt }) => ({
+              startsAt: formatOwnerInstant(startsAt),
+              endsAt: formatOwnerInstant(endsAt),
+            })),
+          })),
+        });
     },
     createEventType: async (request, reply) => {
       const outcome = eventTypes.create(request.body);

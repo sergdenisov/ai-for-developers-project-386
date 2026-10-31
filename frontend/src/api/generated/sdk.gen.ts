@@ -9,6 +9,9 @@ import type {
   GetEventTypeData,
   GetEventTypeErrors,
   GetEventTypeResponses,
+  GetFreeSlotsData,
+  GetFreeSlotsErrors,
+  GetFreeSlotsResponses,
   GetOwnerData,
   GetOwnerResponses,
   ListEventTypesData,
@@ -67,6 +70,17 @@ export const getEventType = <ThrowOnError extends boolean = false>(
 ): RequestResult<GetEventTypeResponses, GetEventTypeErrors, ThrowOnError> =>
   (options.client ?? client).get<GetEventTypeResponses, GetEventTypeErrors, ThrowOnError>({
     url: '/event-types/{id}',
+    ...options,
+  });
+
+/**
+ * Returns the Free Slots of an Event Type on every day of the Booking Window: a snapshot that is not cached.
+ */
+export const getFreeSlots = <ThrowOnError extends boolean = false>(
+  options: Options<GetFreeSlotsData, ThrowOnError>,
+): RequestResult<GetFreeSlotsResponses, GetFreeSlotsErrors, ThrowOnError> =>
+  (options.client ?? client).get<GetFreeSlotsResponses, GetFreeSlotsErrors, ThrowOnError>({
+    url: '/event-types/{id}/free-slots',
     ...options,
   });
 

@@ -71,6 +71,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /event-types/{id}/free-slots:
+    get:
+      operationId: getFreeSlots
+      description: 'Returns the Free Slots of an Event Type on every day of the Booking Window: a snapshot that is not cached.'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          headers:
+            Cache-Control:
+              required: true
+              schema:
+                type: string
+                enum:
+                  - no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreeSlots'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /owner:
     get:
       operationId: getOwner
@@ -102,6 +132,17 @@ components:
             type: string
           description: One message in Russian per invalid field; nested fields use dots (`guest.email`).
       description: The one shape of every error response.
+    BookingWindow:
+      type: object
+      required:
+        - firstDate
+        - lastDate
+      properties:
+        firstDate:
+          $ref: '#/components/schemas/OwnerDate'
+        lastDate:
+          $ref: '#/components/schemas/OwnerDate'
+      description: 'The days a Guest can book: today in the Owner Time Zone and the days after it.'
     CreateEventTypeRequest:
       type: object
       required:
@@ -167,6 +208,39 @@ components:
       maxLength: 50
       pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
       description: 'Identifier of an Event Type: lowercase Latin letters and digits, words joined by single hyphens.'
+    FreeSlots:
+      type: object
+      required:
+        - window
+        - days
+      properties:
+        window:
+          $ref: '#/components/schemas/BookingWindow'
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/FreeSlotsDay'
+          description: Every day of the window in order, days without Free Slots included.
+      description: The Free Slots of an Event Type over the Booking Window.
+    FreeSlotsDay:
+      type: object
+      required:
+        - date
+        - slots
+      properties:
+        date:
+          $ref: '#/components/schemas/OwnerDate'
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Slot'
+      description: The Free Slots of one day, ordered by start; empty when the day has none.
+    Moment:
+      type: string
+      format: date-time
+      description: |-
+        A moment as RFC 3339. Responses give it in the Owner Time Zone to whole seconds, `2026-11-02T10:00:00+03:00`;
+        requests may use any offset, but must have one.
     Owner:
       type: object
       required:
@@ -187,6 +261,21 @@ components:
           format: int32
           description: Number of days, today included, that Guests can book.
       description: The one person whose calendar is booked.
+    OwnerDate:
+      type: string
+      format: date
+      description: A calendar day `YYYY-MM-DD` in the Owner Time Zone.
+    Slot:
+      type: object
+      required:
+        - startsAt
+        - endsAt
+      properties:
+        startsAt:
+          $ref: '#/components/schemas/Moment'
+        endsAt:
+          $ref: '#/components/schemas/Moment'
+      description: A period of an Event Type's duration on the Slot Grid within Working Hours; half-open, `[startsAt, endsAt)`.
     WallTime:
       type: string
       pattern: ^([01][0-9]|2[0-3]):[0-5][0-9]$

@@ -22,6 +22,14 @@ export type ApiError = {
 };
 
 /**
+ * The days a Guest can book: today in the Owner Time Zone and the days after it.
+ */
+export type BookingWindow = {
+  firstDate: OwnerDate;
+  lastDate: OwnerDate;
+};
+
+/**
  * Data of a new Event Type. Unknown fields are dropped.
  */
 export type CreateEventTypeRequest = {
@@ -83,6 +91,31 @@ export type EventType = {
 export type EventTypeId = string;
 
 /**
+ * The Free Slots of an Event Type over the Booking Window.
+ */
+export type FreeSlots = {
+  window: BookingWindow;
+  /**
+   * Every day of the window in order, days without Free Slots included.
+   */
+  days: Array<FreeSlotsDay>;
+};
+
+/**
+ * The Free Slots of one day, ordered by start; empty when the day has none.
+ */
+export type FreeSlotsDay = {
+  date: OwnerDate;
+  slots: Array<Slot>;
+};
+
+/**
+ * A moment as RFC 3339. Responses give it in the Owner Time Zone to whole seconds, `2026-11-02T10:00:00+03:00`;
+ * requests may use any offset, but must have one.
+ */
+export type Moment = string;
+
+/**
  * The one person whose calendar is booked.
  */
 export type Owner = {
@@ -96,6 +129,19 @@ export type Owner = {
    * Number of days, today included, that Guests can book.
    */
   bookingWindowDays: number;
+};
+
+/**
+ * A calendar day `YYYY-MM-DD` in the Owner Time Zone.
+ */
+export type OwnerDate = string;
+
+/**
+ * A period of an Event Type's duration on the Slot Grid within Working Hours; half-open, `[startsAt, endsAt)`.
+ */
+export type Slot = {
+  startsAt: Moment;
+  endsAt: Moment;
 };
 
 /**
@@ -182,6 +228,33 @@ export type GetEventTypeResponses = {
 };
 
 export type GetEventTypeResponse = GetEventTypeResponses[keyof GetEventTypeResponses];
+
+export type GetFreeSlotsData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: '/event-types/{id}/free-slots';
+};
+
+export type GetFreeSlotsErrors = {
+  /**
+   * The requested resource does not exist.
+   */
+  404: ApiError;
+};
+
+export type GetFreeSlotsError = GetFreeSlotsErrors[keyof GetFreeSlotsErrors];
+
+export type GetFreeSlotsResponses = {
+  /**
+   * The request has succeeded.
+   */
+  200: FreeSlots;
+};
+
+export type GetFreeSlotsResponse = GetFreeSlotsResponses[keyof GetFreeSlotsResponses];
 
 export type GetOwnerData = {
   body?: never;
