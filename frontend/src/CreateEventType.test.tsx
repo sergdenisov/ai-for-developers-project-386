@@ -174,6 +174,9 @@ test('adds the new Event Type to the end of the list and notifies the Owner', as
   expect(await screen.findByText('Тип события «Консультация» создан')).toBeDefined();
   await screen.findByText('Консультация', { selector: 'li *' });
   const items = screen.getAllByRole('listitem');
-  expect(items.map((item) => item.textContent)).toEqual(['Знакомство', 'Консультация']);
+  expect(items.map((item) => within(item).getByRole('link').textContent)).toEqual([
+    'Знакомство',
+    'Консультация',
+  ]);
   expect(screen.getByRole<HTMLInputElement>('textbox', { name: 'Название' }).value).toBe('');
 });
