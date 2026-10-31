@@ -3,6 +3,9 @@
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
 import type {
+  CreateBookingData,
+  CreateBookingErrors,
+  CreateBookingResponses,
   CreateEventTypeData,
   CreateEventTypeErrors,
   CreateEventTypeResponses,
@@ -35,6 +38,23 @@ export type Options<
    */
   meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid
+ * within Working Hours and the Booking Window (`400` with `fields.startsAt`), a Slot that has started
+ * (`409 SLOT_STARTED`), an overlap with a Booking of any Event Type (`409 SLOT_UNAVAILABLE`).
+ */
+export const createBooking = <ThrowOnError extends boolean = false>(
+  options: Options<CreateBookingData, ThrowOnError>,
+): RequestResult<CreateBookingResponses, CreateBookingErrors, ThrowOnError> =>
+  (options.client ?? client).post<CreateBookingResponses, CreateBookingErrors, ThrowOnError>({
+    url: '/bookings',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
 
 /**
  * Lists all Event Types in creation order, oldest first.

@@ -26,6 +26,9 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 - Scheduling rules (Working Hours, Slot Grid, Booking Window, Free Slots) live in `backend/src/schedule.ts`, pure
   functions that take `now` as an argument; handlers call it and format moments with `formatOwnerInstant` from
   `backend/src/owner-time.ts` (`+03:00`, whole seconds). Unit-test new rules there.
+- Two Bookings never overlap, whatever their Event Types. `book` in `backend/src/bookings.ts` checks the Slot and
+  inserts the Booking in one synchronous step; never put an `await` between the check and the insert, or
+  simultaneous requests can book the same time.
 - Errors have one shape, `ApiError { code, message, fields? }`. Every operation declares its error responses in
   `spec/main.tsp`; handlers answer them with `reply.code(N).send(apiError(...))` from `backend/src/errors.ts`, whose
   error handler brings Fastify's own errors (request validation, unknown route, anything unexpected) to that shape.

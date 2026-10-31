@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { bookingWindow, checkStart, freeSlots } from '../src/schedule.js';
+import { bookingWindow, checkBooking, checkStart, freeSlots, overlaps } from '../src/schedule.js';
 
 /** 2 November 2026, 10:00 Moscow time. */
 const now = new Date('2026-11-02T10:00:00+03:00');
@@ -10,8 +10,13 @@ function moscow(dateTime: string) {
   return new Date(`${dateTime}+03:00`);
 }
 
-function slotsOn(date: string, durationMinutes: number, at = now) {
-  const day = freeSlots({ now: at, durationMinutes }).days.find((d) => d.date === date);
+function slotsOn(
+  date: string,
+  durationMinutes: number,
+  at = now,
+  bookings: { startsAt: Date; endsAt: Date }[] = [],
+) {
+  const day = freeSlots({ now: at, durationMinutes, bookings }).days.find((d) => d.date === date);
   if (day === undefined) {
     throw new Error(`${date} is not in the Booking Window`);
   }
@@ -67,6 +72,23 @@ describe('Free Slots of a day', () => {
     expect(slots[0]?.startsAt).toEqual(moscow('2026-11-02T10:00:00'));
   });
 
+  test('leave out the Slots that overlap a Booking, and keep those that only touch it', () => {
+    const booking = {
+      startsAt: moscow('2026-11-03T10:00:00'),
+      endsAt: moscow('2026-11-03T11:00:00'),
+    };
+
+    const starts = slotsOn('2026-11-03', 30, now, [booking]).map(({ startsAt }) => startsAt);
+
+    expect(starts).toContainEqual(moscow('2026-11-03T09:30:00'));
+    expect(starts).not.toContainEqual(moscow('2026-11-03T09:45:00'));
+    expect(starts).not.toContainEqual(moscow('2026-11-03T10:00:00'));
+    expect(starts).not.toContainEqual(moscow('2026-11-03T10:30:00'));
+    expect(starts).toContainEqual(moscow('2026-11-03T11:00:00'));
+    // 09:00 to 17:30 is 35 starts; 09:45, 10:00, 10:15, 10:30 and 10:45 overlap the Booking.
+    expect(starts).toHaveLength(30);
+  });
+
   test('leave today empty after 18:00', () => {
     expect(slotsOn('2026-11-02', 15, moscow('2026-11-02T18:00:00'))).toEqual([]);
     expect(slotsOn('2026-11-02', 15, moscow('2026-11-02T23:59:59'))).toEqual([]);
@@ -80,7 +102,7 @@ describe('Free Slots of a day', () => {
 
 describe('the Booking Window', () => {
   test('is today in Moscow and the 13 days after it, every day listed in order', () => {
-    const { window, days } = freeSlots({ now, durationMinutes: 30 });
+    const { window, days } = freeSlots({ now, durationMinutes: 30, bookings: [] });
 
     expect(window).toEqual({ firstDate: '2026-11-02', lastDate: '2026-11-15' });
     expect(days.map(({ date }) => date)).toEqual([
@@ -121,7 +143,11 @@ describe('the Booking Window', () => {
   });
 
   test('has Slots on every day after today', () => {
-    const { days } = freeSlots({ now: moscow('2026-11-02T18:00:00'), durationMinutes: 60 });
+    const { days } = freeSlots({
+      now: moscow('2026-11-02T18:00:00'),
+      durationMinutes: 60,
+      bookings: [],
+    });
 
     expect(days.map(({ slots }) => slots.length)).toEqual([0, ...Array(13).fill(33)]);
   });
@@ -158,5 +184,71 @@ describe('checking the start of a Booking', () => {
     expect(checkStart({ startsAt: moscow('2026-11-01T09:00:00'), durationMinutes: 60, now })).toBe(
       'valid',
     );
+  });
+});
+
+/** A period between two Moscow wall times on 3 November. */
+function period(start: string, end: string) {
+  return { startsAt: moscow(`2026-11-03T${start}:00`), endsAt: moscow(`2026-11-03T${end}:00`) };
+}
+
+describe('overlap of two periods', () => {
+  test.each([
+    { a: ['10:00', '11:00'], b: ['10:00', '11:00'], result: true, reason: 'the same period' },
+    { a: ['10:00', '11:00'], b: ['10:30', '11:00'], result: true, reason: 'a later start inside' },
+    { a: ['10:00', '11:00'], b: ['09:30', '10:15'], result: true, reason: 'an earlier start' },
+    { a: ['10:00', '11:00'], b: ['10:15', '10:30'], result: true, reason: 'a period inside' },
+    { a: ['10:15', '10:30'], b: ['10:00', '11:00'], result: true, reason: 'a period around' },
+    { a: ['10:00', '11:00'], b: ['11:00', '11:30'], result: false, reason: 'a start at the end' },
+    { a: ['10:00', '11:00'], b: ['09:00', '10:00'], result: false, reason: 'an end at the start' },
+    { a: ['10:00', '11:00'], b: ['11:15', '12:00'], result: false, reason: 'a later period' },
+  ])('is $result for $reason', ({ a, b, result }) => {
+    const [aStart = '', aEnd = ''] = a;
+    const [bStart = '', bEnd = ''] = b;
+
+    expect(overlaps(period(aStart, aEnd), period(bStart, bEnd))).toBe(result);
+  });
+});
+
+describe('checking a new Booking', () => {
+  /** 10:00–11:00 on 3 November, of any Event Type. */
+  const bookings = [
+    { startsAt: moscow('2026-11-03T10:00:00'), endsAt: moscow('2026-11-03T11:00:00') },
+  ];
+
+  function check(startsAt: string, durationMinutes: number) {
+    return checkBooking({ startsAt: moscow(startsAt), durationMinutes, now, bookings });
+  }
+
+  test('accepts a Free Slot, including one that starts when a Booking ends', () => {
+    expect(check('2026-11-03T11:00:00', 30)).toBe('valid');
+    expect(check('2026-11-03T09:30:00', 30)).toBe('valid');
+  });
+
+  test('rejects a Slot that overlaps a Booking, wholly or partly', () => {
+    expect(check('2026-11-03T10:00:00', 60)).toBe('unavailable');
+    expect(check('2026-11-03T10:30:00', 30)).toBe('unavailable');
+    expect(check('2026-11-03T09:30:00', 45)).toBe('unavailable');
+  });
+
+  test('rejects a Slot that has started, including one that starts now', () => {
+    expect(check('2026-11-02T09:00:00', 30)).toBe('started');
+    expect(check('2026-11-02T10:00:00', 30)).toBe('started');
+    expect(check('2026-11-01T09:00:00', 30)).toBe('started');
+  });
+
+  test('checks the start before whether it has started, and that before overlaps', () => {
+    expect(check('2026-11-02T09:10:00', 30)).toBe('off-grid');
+    expect(check('2026-11-03T10:10:00', 30)).toBe('off-grid');
+    expect(
+      checkBooking({
+        startsAt: moscow('2026-11-02T10:00:00'),
+        durationMinutes: 30,
+        now,
+        bookings: [
+          { startsAt: moscow('2026-11-02T10:00:00'), endsAt: moscow('2026-11-02T10:30:00') },
+        ],
+      }),
+    ).toBe('started');
   });
 });

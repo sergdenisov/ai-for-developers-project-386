@@ -7,6 +7,65 @@
   },
   "tags": [],
   "paths": {
+    "/bookings": {
+      "post": {
+        "operationId": "createBooking",
+        "description": "Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid\nwithin Working Hours and the Booking Window (`400` with `fields.startsAt`), a Slot that has started\n(`409 SLOT_STARTED`), an overlap with a Booking of any Event Type (`409 SLOT_UNAVAILABLE`).",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "The request has succeeded and a new resource has been created as a result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request data can never be accepted in this form.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with data already on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookingRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/event-types": {
       "get": {
         "operationId": "listEventTypes",
@@ -204,6 +263,45 @@
         },
         "description": "The one shape of every error response."
       },
+      "BookedEventType": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "The Event Type of a Booking: a copy of its identifier and name."
+      },
+      "Booking": {
+        "type": "object",
+        "required": ["id", "eventType", "startsAt", "endsAt", "guest", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/BookedEventType"
+          },
+          "startsAt": {
+            "$ref": "#/components/schemas/Moment"
+          },
+          "endsAt": {
+            "$ref": "#/components/schemas/Moment"
+          },
+          "guest": {
+            "$ref": "#/components/schemas/Guest"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Moment"
+          }
+        },
+        "description": "A Guest's reservation of a Slot of an Event Type."
+      },
       "BookingWindow": {
         "type": "object",
         "required": ["firstDate", "lastDate"],
@@ -216,6 +314,27 @@
           }
         },
         "description": "The days a Guest can book: today in the Owner Time Zone and the days after it."
+      },
+      "CreateBookingRequest": {
+        "type": "object",
+        "required": ["eventTypeId", "startsAt", "guest"],
+        "properties": {
+          "eventTypeId": {
+            "type": "string"
+          },
+          "startsAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Moment"
+              }
+            ],
+            "description": "Start of a Free Slot of the Event Type."
+          },
+          "guest": {
+            "$ref": "#/components/schemas/Guest"
+          }
+        },
+        "description": "Data of a new Booking; the server works out its end from the Event Type duration. Unknown fields are dropped."
       },
       "CreateEventTypeRequest": {
         "type": "object",
@@ -261,6 +380,8 @@
           "NOT_FOUND",
           "EVENT_TYPE_ID_TAKEN",
           "EVENT_TYPE_NAME_TAKEN",
+          "SLOT_STARTED",
+          "SLOT_UNAVAILABLE",
           "INTERNAL_ERROR"
         ],
         "description": "Machine-readable reason of an error; clients choose their reaction by it, not by the text."
@@ -328,6 +449,25 @@
           }
         },
         "description": "The Free Slots of one day, ordered by start; empty when the day has none."
+      },
+      "Guest": {
+        "type": "object",
+        "required": ["name", "email"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name; surrounding spaces are trimmed before the length is checked."
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "description": "Email; surrounding spaces are trimmed before it is checked, letter case is kept."
+          }
+        },
+        "description": "The person who books a Slot; has no account."
       },
       "Moment": {
         "type": "string",

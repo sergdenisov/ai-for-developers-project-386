@@ -3,6 +3,9 @@
 import type { RouteHandler } from 'fastify';
 
 import type {
+  CreateBookingData,
+  CreateBookingErrors,
+  CreateBookingResponses,
   CreateEventTypeData,
   CreateEventTypeErrors,
   CreateEventTypeResponses,
@@ -17,6 +20,10 @@ import type {
 } from './types.gen.js';
 
 export type RouteHandlers = {
+  createBooking: RouteHandler<{
+    Body: CreateBookingData['body'];
+    Reply: CreateBookingErrors & CreateBookingResponses;
+  }>;
   listEventTypes: RouteHandler<{
     Reply: ListEventTypesResponses;
   }>;

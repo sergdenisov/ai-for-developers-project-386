@@ -21,6 +21,12 @@ const patternMessages: Record<string, string> = {
   '^[a-z0-9]+(-[a-z0-9]+)*$': 'Только строчные латинские буквы и цифры, слова через один дефис',
 };
 
+// Messages for the contract's string formats.
+const formatMessages: Record<string, string> = {
+  email: 'Неверный адрес электронной почты',
+  'date-time': 'Нужны дата и время со смещением, например 2026-11-03T10:00:00+03:00',
+};
+
 /** "N символов" in the genitive that follows «не длиннее» and «не короче»: 1 символа, 21 символа, 50 символов. */
 function characters(count: number) {
   return count % 10 === 1 && count % 100 !== 11 ? `${count} символа` : `${count} символов`;
@@ -45,6 +51,8 @@ function fieldMessage({ keyword, params }: FastifySchemaValidationError): string
       return `Должно быть кратно ${String(params.multipleOf)}`;
     case 'pattern':
       return patternMessages[String(params.pattern)] ?? 'Неверный формат';
+    case 'format':
+      return formatMessages[String(params.format)] ?? 'Неверный формат';
     case 'type':
       return params.type === 'integer' ? 'Должно быть целым числом' : 'Неверный тип значения';
     default:

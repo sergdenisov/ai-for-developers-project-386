@@ -4,6 +4,7 @@ import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanst
 
 import { client } from '../client.gen';
 import {
+  createBooking,
   createEventType,
   getEventType,
   getFreeSlots,
@@ -12,6 +13,9 @@ import {
   type Options,
 } from '../sdk.gen';
 import type {
+  CreateBookingData,
+  CreateBookingError,
+  CreateBookingResponse,
   CreateEventTypeData,
   CreateEventTypeError,
   CreateEventTypeResponse,
@@ -26,6 +30,31 @@ import type {
   ListEventTypesData,
   ListEventTypesResponse,
 } from '../types.gen';
+
+/**
+ * Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid
+ * within Working Hours and the Booking Window (`400` with `fields.startsAt`), a Slot that has started
+ * (`409 SLOT_STARTED`), an overlap with a Booking of any Event Type (`409 SLOT_UNAVAILABLE`).
+ */
+export const createBookingMutation = (
+  options?: Partial<Options<CreateBookingData>>,
+): UseMutationOptions<CreateBookingResponse, CreateBookingError, Options<CreateBookingData>> => {
+  const mutationOptions: UseMutationOptions<
+    CreateBookingResponse,
+    CreateBookingError,
+    Options<CreateBookingData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createBooking({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export type QueryKey<TOptions extends Options> = [
   Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {

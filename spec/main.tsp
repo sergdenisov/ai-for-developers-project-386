@@ -13,6 +13,8 @@ enum ErrorCode {
   NOT_FOUND,
   EVENT_TYPE_ID_TAKEN,
   EVENT_TYPE_NAME_TAKEN,
+  SLOT_STARTED,
+  SLOT_UNAVAILABLE,
   INTERNAL_ERROR,
 }
 
@@ -186,3 +188,60 @@ op getFreeSlots(@path id: string):
       @body body: FreeSlots;
     }
   | NotFoundResponse;
+
+/** The person who books a Slot; has no account. */
+model Guest {
+  /** Name; surrounding spaces are trimmed before the length is checked. */
+  @minLength(1)
+  @maxLength(100)
+  name: string;
+
+  /** Email; surrounding spaces are trimmed before it is checked, letter case is kept. */
+  @format("email")
+  @maxLength(254)
+  email: string;
+}
+
+/** The Event Type of a Booking: a copy of its identifier and name. */
+model BookedEventType {
+  id: string;
+  name: string;
+}
+
+/** A Guest's reservation of a Slot of an Event Type. */
+model Booking {
+  @format("uuid")
+  id: string;
+
+  eventType: BookedEventType;
+  startsAt: Moment;
+  endsAt: Moment;
+  guest: Guest;
+  createdAt: Moment;
+}
+
+/** Data of a new Booking; the server works out its end from the Event Type duration. Unknown fields are dropped. */
+model CreateBookingRequest {
+  eventTypeId: string;
+
+  /** Start of a Free Slot of the Event Type. */
+  startsAt: Moment;
+
+  guest: Guest;
+}
+
+/**
+ * Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid
+ * within Working Hours and the Booking Window (`400` with `fields.startsAt`), a Slot that has started
+ * (`409 SLOT_STARTED`), an overlap with a Booking of any Event Type (`409 SLOT_UNAVAILABLE`).
+ */
+@route("/bookings")
+@post
+op createBooking(@body body: CreateBookingRequest):
+  | {
+      @statusCode statusCode: 201;
+      @body body: Booking;
+    }
+  | ValidationFailedResponse
+  | NotFoundResponse
+  | ConflictResponse;

@@ -22,11 +22,43 @@ export type ApiError = {
 };
 
 /**
+ * The Event Type of a Booking: a copy of its identifier and name.
+ */
+export type BookedEventType = {
+  id: string;
+  name: string;
+};
+
+/**
+ * A Guest's reservation of a Slot of an Event Type.
+ */
+export type Booking = {
+  id: string;
+  eventType: BookedEventType;
+  startsAt: Moment;
+  endsAt: Moment;
+  guest: Guest;
+  createdAt: Moment;
+};
+
+/**
  * The days a Guest can book: today in the Owner Time Zone and the days after it.
  */
 export type BookingWindow = {
   firstDate: OwnerDate;
   lastDate: OwnerDate;
+};
+
+/**
+ * Data of a new Booking; the server works out its end from the Event Type duration. Unknown fields are dropped.
+ */
+export type CreateBookingRequest = {
+  eventTypeId: string;
+  /**
+   * Start of a Free Slot of the Event Type.
+   */
+  startsAt: Moment;
+  guest: Guest;
 };
 
 /**
@@ -61,6 +93,8 @@ export type ErrorCode =
   | 'NOT_FOUND'
   | 'EVENT_TYPE_ID_TAKEN'
   | 'EVENT_TYPE_NAME_TAKEN'
+  | 'SLOT_STARTED'
+  | 'SLOT_UNAVAILABLE'
   | 'INTERNAL_ERROR';
 
 /**
@@ -110,6 +144,20 @@ export type FreeSlotsDay = {
 };
 
 /**
+ * The person who books a Slot; has no account.
+ */
+export type Guest = {
+  /**
+   * Name; surrounding spaces are trimmed before the length is checked.
+   */
+  name: string;
+  /**
+   * Email; surrounding spaces are trimmed before it is checked, letter case is kept.
+   */
+  email: string;
+};
+
+/**
  * A moment as RFC 3339. Responses give it in the Owner Time Zone to whole seconds, `2026-11-02T10:00:00+03:00`;
  * requests may use any offset, but must have one.
  */
@@ -156,6 +204,39 @@ export type WorkingHours = {
   start: WallTime;
   end: WallTime;
 };
+
+export type CreateBookingData = {
+  body: CreateBookingRequest;
+  path?: never;
+  query?: never;
+  url: '/bookings';
+};
+
+export type CreateBookingErrors = {
+  /**
+   * The request data can never be accepted in this form.
+   */
+  400: ApiError;
+  /**
+   * The requested resource does not exist.
+   */
+  404: ApiError;
+  /**
+   * The request conflicts with data already on the server.
+   */
+  409: ApiError;
+};
+
+export type CreateBookingError = CreateBookingErrors[keyof CreateBookingErrors];
+
+export type CreateBookingResponses = {
+  /**
+   * The request has succeeded and a new resource has been created as a result.
+   */
+  201: Booking;
+};
+
+export type CreateBookingResponse = CreateBookingResponses[keyof CreateBookingResponses];
 
 export type ListEventTypesData = {
   body?: never;

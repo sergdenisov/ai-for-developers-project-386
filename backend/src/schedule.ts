@@ -20,7 +20,15 @@ const workingHours = {
 };
 
 /** A period of time, half-open: `[startsAt, endsAt)`. */
-type Interval = { startsAt: Date; endsAt: Date };
+export type Interval = { startsAt: Date; endsAt: Date };
+
+/**
+ * Two periods overlap when each starts before the other ends, whatever their Event Types. Periods are half-open, so
+ * one that starts exactly when the other ends does not overlap it.
+ */
+export function overlaps(a: Interval, b: Interval): boolean {
+  return a.startsAt.getTime() < b.endsAt.getTime() && b.startsAt.getTime() < a.endsAt.getTime();
+}
 
 /** The days a Guest can book: today in the Owner Time Zone and the days after it. */
 export type BookingWindow = { firstDate: string; lastDate: string };
@@ -36,6 +44,11 @@ export function bookingWindow(now: Date): BookingWindow {
   return { firstDate, lastDate: addDays(firstDate, owner.bookingWindowDays - 1) };
 }
 
+/** The end of a Slot of this duration that starts at `startsAt`. */
+export function slotEnd(startsAt: Date, durationMinutes: number): Date {
+  return new Date(startsAt.getTime() + durationMinutes * MINUTE_MS);
+}
+
 /** The Slots of an Event Type of this duration on the date, in order. */
 function slotsOn(date: string, durationMinutes: number): Interval[] {
   const slots: Interval[] = [];
@@ -45,7 +58,7 @@ function slotsOn(date: string, durationMinutes: number): Interval[] {
     start += SLOT_GRID_MINUTES
   ) {
     const startsAt = ownerInstant(date, start);
-    slots.push({ startsAt, endsAt: new Date(startsAt.getTime() + durationMinutes * MINUTE_MS) });
+    slots.push({ startsAt, endsAt: slotEnd(startsAt, durationMinutes) });
   }
   return slots;
 }
@@ -84,20 +97,58 @@ function hasStarted(startsAt: Date, now: Date): boolean {
   return startsAt.getTime() <= now.getTime();
 }
 
-/** The Free Slots of an Event Type of this duration on every day of the Booking Window. */
+/**
+ * Whether a new Booking may take the Slot, or the first rule it breaks, in the order the API reports them: a start
+ * that can never begin a Slot, then a Slot that has started, then one that overlaps a Booking of any Event Type.
+ */
+export type BookingCheck = StartCheck | 'started' | 'unavailable';
+
+export function checkBooking({
+  startsAt,
+  durationMinutes,
+  now,
+  bookings,
+}: {
+  startsAt: Date;
+  durationMinutes: number;
+  now: Date;
+  bookings: readonly Interval[];
+}): BookingCheck {
+  const start = checkStart({ startsAt, durationMinutes, now });
+  if (start !== 'valid') {
+    return start;
+  }
+  if (hasStarted(startsAt, now)) {
+    return 'started';
+  }
+  const slot = { startsAt, endsAt: slotEnd(startsAt, durationMinutes) };
+  if (bookings.some((booking) => overlaps(slot, booking))) {
+    return 'unavailable';
+  }
+  return 'valid';
+}
+
+/**
+ * The Free Slots of an Event Type of this duration on every day of the Booking Window: the Slots that have not
+ * started and overlap none of the Bookings, of any Event Type.
+ */
 export function freeSlots({
   now,
   durationMinutes,
+  bookings,
 }: {
   now: Date;
   durationMinutes: number;
+  bookings: readonly Interval[];
 }): FreeSlots {
   const window = bookingWindow(now);
   const days = Array.from({ length: owner.bookingWindowDays }, (_, index) => {
     const date = addDays(window.firstDate, index);
     return {
       date,
-      slots: slotsOn(date, durationMinutes).filter(({ startsAt }) => !hasStarted(startsAt, now)),
+      slots: slotsOn(date, durationMinutes).filter(
+        (slot) => !hasStarted(slot.startsAt, now) && !bookings.some((b) => overlaps(slot, b)),
+      ),
     };
   });
   return { window, days };
