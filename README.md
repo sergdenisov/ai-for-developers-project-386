@@ -93,6 +93,21 @@ fix(frontend): show validation error on booking form
 docs: describe commit conventions
 ```
 
+## Выпуск версий
+
+Версии выпускает [release-please](https://github.com/googleapis/release-please) по сообщениям коммитов. Версия одна
+на весь репозиторий: она хранится в `version.txt`, журнал изменений — в `CHANGELOG.md`. Версии в `package.json`
+пакетов не меняются.
+
+1. После каждого push в `main` workflow `release-please.yml` открывает или обновляет release PR
+   `chore(main): release X.Y.Z`: в нём новая версия и записи журнала.
+2. Слияние release PR создаёт тег `vX.Y.Z` и GitHub Release.
+
+В журнал попадают `feat`, `fix`, `perf` и `revert`, остальные типы скрыты. До `1.0.0` ломающее изменение повышает
+minor-версию, а не major. Первая версия — `0.1.0` (`initial-version` в `release-please-config.json`). Настройки
+лежат в `release-please-config.json` и `.release-please-manifest.json`; манифест после первого релиза ведёт
+release-please, руками его не правим.
+
 ## Сценарии работы
 
 ### Владелец
