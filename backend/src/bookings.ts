@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
 
 import type { EventType, Guest } from './api/generated/index.js';
-import { checkBooking, type Interval, slotEnd } from './schedule.js';
+import { checkBooking, type Period, slotEnd } from './slots.js';
 
 /** A Booking as the store keeps it: moments as `Date`, formatted only in the response. */
-export type StoredBooking = Interval & {
+export type StoredBooking = Period & {
   id: string;
   eventType: { id: string; name: string };
   guest: Guest;

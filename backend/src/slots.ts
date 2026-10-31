@@ -2,7 +2,7 @@ import { addDays, ownerDate, ownerInstant, ownerMinuteOfDay } from './owner-time
 import { owner } from './owner.js';
 
 /**
- * The scheduling rules: Working Hours, the Slot Grid, the Booking Window and Free Slots. Pure functions: the
+ * The rules of Slots: Working Hours, the Slot Grid, the Booking Window and Free Slots. Pure functions: the
  * current moment comes in as `now`, nothing here reads the system clock or knows about HTTP.
  */
 
@@ -20,13 +20,13 @@ const workingHours = {
 };
 
 /** A period of time, half-open: `[startsAt, endsAt)`. */
-export type Interval = { startsAt: Date; endsAt: Date };
+export type Period = { startsAt: Date; endsAt: Date };
 
 /**
  * Two periods overlap when each starts before the other ends, whatever their Event Types. Periods are half-open, so
  * one that starts exactly when the other ends does not overlap it.
  */
-export function overlaps(a: Interval, b: Interval): boolean {
+export function overlaps(a: Period, b: Period): boolean {
   return a.startsAt.getTime() < b.endsAt.getTime() && b.startsAt.getTime() < a.endsAt.getTime();
 }
 
@@ -34,7 +34,7 @@ export function overlaps(a: Interval, b: Interval): boolean {
  * The Upcoming Bookings among `bookings`, nearest first: those that have not ended, a call in progress included. A
  * Booking that ends exactly now has ended.
  */
-export function upcoming<T extends Interval>(bookings: readonly T[], now: Date): T[] {
+export function upcoming<T extends Period>(bookings: readonly T[], now: Date): T[] {
   return bookings
     .filter((booking) => booking.endsAt.getTime() > now.getTime())
     .toSorted((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
@@ -46,7 +46,7 @@ export type BookingWindow = { firstDate: string; lastDate: string };
 export type FreeSlots = {
   window: BookingWindow;
   /** Every day of the window in order; a day without Free Slots has none. */
-  days: { date: string; slots: Interval[] }[];
+  days: { date: string; slots: Period[] }[];
 };
 
 export function bookingWindow(now: Date): BookingWindow {
@@ -60,8 +60,8 @@ export function slotEnd(startsAt: Date, durationMinutes: number): Date {
 }
 
 /** The Slots of an Event Type of this duration on the date, in order. */
-function slotsOn(date: string, durationMinutes: number): Interval[] {
-  const slots: Interval[] = [];
+function slotsOn(date: string, durationMinutes: number): Period[] {
+  const slots: Period[] = [];
   for (
     let start = workingHours.start;
     start + durationMinutes <= workingHours.end;
@@ -122,7 +122,7 @@ export function checkBooking({
   startsAt: Date;
   durationMinutes: number;
   now: Date;
-  bookings: readonly Interval[];
+  bookings: readonly Period[];
 }): BookingCheck {
   const start = checkStart({ startsAt, durationMinutes, now });
   if (start !== 'valid') {
@@ -149,7 +149,7 @@ export function freeSlots({
 }: {
   now: Date;
   durationMinutes: number;
-  bookings: readonly Interval[];
+  bookings: readonly Period[];
 }): FreeSlots {
   const window = bookingWindow(now);
   const days = Array.from({ length: owner.bookingWindowDays }, (_, index) => {

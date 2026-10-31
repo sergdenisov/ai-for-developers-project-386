@@ -9,7 +9,7 @@ import { createEventTypeStore, trimEventTypeName } from './event-types.js';
 import { formatOwnerInstant } from './owner-time.js';
 import { owner } from './owner.js';
 import { addResponseValidation } from './response-validation.js';
-import { freeSlots, upcoming } from './schedule.js';
+import { freeSlots, upcoming } from './slots.js';
 
 export type AppOptions = {
   logger?: boolean;

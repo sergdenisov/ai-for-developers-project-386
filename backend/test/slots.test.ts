@@ -7,7 +7,7 @@ import {
   freeSlots,
   overlaps,
   upcoming,
-} from '../src/schedule.js';
+} from '../src/slots.js';
 
 /** 2 November 2026, 10:00 Moscow time. */
 const now = new Date('2026-11-02T10:00:00+03:00');
