@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Call Booking API",
+    "description": "API of the call booking service. Paths here have no prefix; the backend serves them under `/api`.",
+    "version": "0.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/event-types": {
+      "get": {
+        "operationId": "listEventTypes",
+        "description": "Lists all Event Types in creation order, oldest first.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EventType": {
+        "type": "object",
+        "required": ["id", "name", "durationMinutes"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier that appears in the booking link `/book/{id}`."
+          },
+          "name": {
+            "type": "string",
+            "description": "Unique name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description; absent when there is none."
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Duration in minutes, a multiple of 15."
+          }
+        },
+        "description": "A template for a call that Guests can book."
+      }
+    }
+  }
+}
