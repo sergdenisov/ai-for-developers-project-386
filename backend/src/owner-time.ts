@@ -5,7 +5,7 @@ import { owner } from './owner.js';
  * fixed offset. A calendar day is `YYYY-MM-DD`; a time of day is minutes since midnight.
  */
 
-const MINUTE_MS = 60_000;
+export const MINUTE_MS = 60_000;
 
 const wallClock = new Intl.DateTimeFormat('en-US', {
   timeZone: owner.timeZone,
@@ -51,6 +51,12 @@ function offsetMinutes(instant: Date): number {
   return (offset.startsWith('-') ? -1 : 1) * (hours * 60 + minutes);
 }
 
+/** The parts of a calendar day `YYYY-MM-DD`; the month is 1-12. */
+function dateParts(date: string) {
+  const [year = 0, month = 1, day = 1] = date.split('-').map(Number);
+  return { year, month, day };
+}
+
 /** The Owner's calendar day at the instant. */
 export function ownerDate(instant: Date): string {
   return wallTime(instant).date;
@@ -66,7 +72,7 @@ export function ownerMinuteOfDay(instant: Date): number {
 
 /** The instant at which the Owner's clock shows the time of day on the date. */
 export function ownerInstant(date: string, minuteOfDay: number): Date {
-  const [year = 0, month = 1, day = 1] = date.split('-').map(Number);
+  const { year, month, day } = dateParts(date);
   const asIfUtc = Date.UTC(year, month - 1, day, 0, minuteOfDay);
   // The offset at the guess is right unless the zone changes its offset in between; a second pass settles that.
   const guess = new Date(asIfUtc - offsetMinutes(new Date(asIfUtc)) * MINUTE_MS);
@@ -75,7 +81,7 @@ export function ownerInstant(date: string, minuteOfDay: number): Date {
 
 /** The calendar day `days` after the date. */
 export function addDays(date: string, days: number): string {
-  const [year = 0, month = 1, day = 1] = date.split('-').map(Number);
+  const { year, month, day } = dateParts(date);
   return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
 }
 

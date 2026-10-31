@@ -19,6 +19,11 @@ export type AppOptions = {
   now?: () => Date;
 };
 
+/** The `404 NOT_FOUND` body for an Event Type id that names none. */
+function eventTypeNotFound() {
+  return apiError('NOT_FOUND', 'Тип события не найден');
+}
+
 /** A Booking as the API gives it: moments in the Owner Time Zone. */
 function bookingResource({ startsAt, endsAt, createdAt, ...booking }: StoredBooking) {
   return {
@@ -75,13 +80,13 @@ export function buildApp({
     getEventType: async (request, reply) => {
       const eventType = eventTypes.get(request.params.id);
       return eventType === undefined
-        ? reply.code(404).send(apiError('NOT_FOUND', 'Тип события не найден'))
+        ? reply.code(404).send(eventTypeNotFound())
         : reply.code(200).send(eventType);
     },
     getFreeSlots: async (request, reply) => {
       const eventType = eventTypes.get(request.params.id);
       if (eventType === undefined) {
-        return reply.code(404).send(apiError('NOT_FOUND', 'Тип события не найден'));
+        return reply.code(404).send(eventTypeNotFound());
       }
       const { window, days } = freeSlots({
         now: now(),
@@ -118,7 +123,7 @@ export function buildApp({
       const { eventTypeId, startsAt, guest } = request.body;
       const eventType = eventTypes.get(eventTypeId);
       if (eventType === undefined) {
-        return reply.code(404).send(apiError('NOT_FOUND', 'Тип события не найден'));
+        return reply.code(404).send(eventTypeNotFound());
       }
       // Checks the Slot and inserts the Booking synchronously: nothing else runs in between.
       const outcome = bookings.book({ eventType, startsAt: new Date(startsAt), guest, now: now() });

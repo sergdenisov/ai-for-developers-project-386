@@ -1,5 +1,5 @@
 import type { StoredBooking } from './bookings.js';
-import { addDays, ownerDate, ownerInstant, ownerMinuteOfDay } from './owner-time.js';
+import { addDays, MINUTE_MS, ownerDate, ownerInstant, ownerMinuteOfDay } from './owner-time.js';
 import { owner } from './owner.js';
 
 /**
@@ -7,7 +7,6 @@ import { owner } from './owner.js';
  * current moment comes in as `now`, nothing here reads the system clock or knows about HTTP.
  */
 
-const MINUTE_MS = 60_000;
 const SLOT_GRID_MINUTES = 15;
 
 function minuteOfDay(wallTime: string): number {
