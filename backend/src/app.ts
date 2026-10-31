@@ -39,6 +39,12 @@ export function buildApp({ logger = false, validateResponses = false }: AppOptio
   const serviceHandlers: RouteHandlers = {
     getOwner: async (_request, reply) => reply.code(200).send(owner),
     listEventTypes: async (_request, reply) => reply.code(200).send(eventTypes.list()),
+    getEventType: async (request, reply) => {
+      const eventType = eventTypes.get(request.params.id);
+      return eventType === undefined
+        ? reply.code(404).send(apiError('NOT_FOUND', 'Тип события не найден'))
+        : reply.code(200).send(eventType);
+    },
     createEventType: async (request, reply) => {
       const outcome = eventTypes.create(request.body);
       switch (outcome.kind) {

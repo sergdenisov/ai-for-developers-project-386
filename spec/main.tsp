@@ -34,6 +34,13 @@ model ValidationFailedResponse {
   @body body: ApiError;
 }
 
+/** The requested resource does not exist. */
+@error
+model NotFoundResponse {
+  @statusCode statusCode: 404;
+  @body body: ApiError;
+}
+
 /** The request conflicts with data already on the server. */
 @error
 model ConflictResponse {
@@ -117,6 +124,11 @@ model CreateEventTypeRequest {
 @route("/event-types")
 @get
 op listEventTypes(): EventType[];
+
+/** Returns one Event Type by its identifier. */
+@route("/event-types/{id}")
+@get
+op getEventType(@path id: string): EventType | NotFoundResponse;
 
 /** Creates an Event Type; it goes to the end of the list. */
 @route("/event-types")

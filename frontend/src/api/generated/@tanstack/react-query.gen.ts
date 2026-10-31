@@ -3,11 +3,14 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { createEventType, getOwner, listEventTypes, type Options } from '../sdk.gen';
+import { createEventType, getEventType, getOwner, listEventTypes, type Options } from '../sdk.gen';
 import type {
   CreateEventTypeData,
   CreateEventTypeError,
   CreateEventTypeResponse,
+  GetEventTypeData,
+  GetEventTypeError,
+  GetEventTypeResponse,
   GetOwnerData,
   GetOwnerResponse,
   ListEventTypesData,
@@ -104,6 +107,31 @@ export const createEventTypeMutation = (
   };
   return mutationOptions;
 };
+
+export const getEventTypeQueryKey = (options: Options<GetEventTypeData>) =>
+  createQueryKey('getEventType', options);
+
+/**
+ * Returns one Event Type by its identifier.
+ */
+export const getEventTypeOptions = (options: Options<GetEventTypeData>) =>
+  queryOptions<
+    GetEventTypeResponse,
+    GetEventTypeError,
+    GetEventTypeResponse,
+    ReturnType<typeof getEventTypeQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getEventType({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getEventTypeQueryKey(options),
+  });
 
 export const getOwnerQueryKey = (options?: Options<GetOwnerData>) =>
   createQueryKey('getOwner', options);

@@ -115,6 +115,51 @@ test('lists Event Types in creation order, oldest first', async () => {
   expect(eventTypes.map(({ name }) => name)).toEqual(['Знакомство', 'Консультация', 'Ревью кода']);
 });
 
+describe('getting one Event Type', () => {
+  test('returns an Event Type by its id', async () => {
+    await createEventType({ id: 'consultation', name: 'Консультация', durationMinutes: 60 });
+    await createEventType({
+      id: 'intro-call',
+      name: 'Знакомство',
+      description: 'Короткий звонок, чтобы познакомиться',
+      durationMinutes: 30,
+    });
+
+    const response = await fetch(app.url('/api/event-types/intro-call'));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      id: 'intro-call',
+      name: 'Знакомство',
+      description: 'Короткий звонок, чтобы познакомиться',
+      durationMinutes: 30,
+    });
+  });
+
+  test('finds an Event Type by its assigned UUID', async () => {
+    const created = await (
+      await createEventType({ name: 'Консультация', durationMinutes: 60 })
+    ).json();
+
+    const response = await fetch(app.url(`/api/event-types/${created.id}`));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(created);
+  });
+
+  test('answers 404 NOT_FOUND for an unknown id', async () => {
+    await createEventType({ id: 'intro-call', name: 'Знакомство', durationMinutes: 30 });
+
+    const response = await fetch(app.url('/api/event-types/no-such-type'));
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      code: 'NOT_FOUND',
+      message: 'Тип события не найден',
+    });
+  });
+});
+
 describe('rejecting invalid data with field errors', () => {
   const valid = { name: 'Знакомство', durationMinutes: 30 };
 

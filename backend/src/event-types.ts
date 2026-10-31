@@ -24,6 +24,8 @@ export function createEventTypeStore() {
   return {
     list: (): EventType[] => eventTypes,
 
+    get: (id: string): EventType | undefined => eventTypes.find((eventType) => eventType.id === id),
+
     create(request: CreateEventTypeRequest): CreateOutcome {
       const name = request.name.trim();
       if (name === '') {

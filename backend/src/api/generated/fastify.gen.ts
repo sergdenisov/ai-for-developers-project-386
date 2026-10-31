@@ -6,6 +6,9 @@ import type {
   CreateEventTypeData,
   CreateEventTypeErrors,
   CreateEventTypeResponses,
+  GetEventTypeData,
+  GetEventTypeErrors,
+  GetEventTypeResponses,
   GetOwnerResponses,
   ListEventTypesResponses,
 } from './types.gen.js';
@@ -17,6 +20,10 @@ export type RouteHandlers = {
   createEventType: RouteHandler<{
     Body: CreateEventTypeData['body'];
     Reply: CreateEventTypeErrors & CreateEventTypeResponses;
+  }>;
+  getEventType: RouteHandler<{
+    Params: GetEventTypeData['path'];
+    Reply: GetEventTypeErrors & GetEventTypeResponses;
   }>;
   getOwner: RouteHandler<{
     Reply: GetOwnerResponses;

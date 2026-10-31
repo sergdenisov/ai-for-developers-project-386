@@ -156,6 +156,33 @@ export type CreateEventTypeResponses = {
 
 export type CreateEventTypeResponse = CreateEventTypeResponses[keyof CreateEventTypeResponses];
 
+export type GetEventTypeData = {
+  body?: never;
+  path: {
+    id: string;
+  };
+  query?: never;
+  url: '/event-types/{id}';
+};
+
+export type GetEventTypeErrors = {
+  /**
+   * The requested resource does not exist.
+   */
+  404: ApiError;
+};
+
+export type GetEventTypeError = GetEventTypeErrors[keyof GetEventTypeErrors];
+
+export type GetEventTypeResponses = {
+  /**
+   * The request has succeeded.
+   */
+  200: EventType;
+};
+
+export type GetEventTypeResponse = GetEventTypeResponses[keyof GetEventTypeResponses];
+
 export type GetOwnerData = {
   body?: never;
   path?: never;

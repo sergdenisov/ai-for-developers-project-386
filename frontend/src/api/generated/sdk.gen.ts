@@ -6,6 +6,9 @@ import type {
   CreateEventTypeData,
   CreateEventTypeErrors,
   CreateEventTypeResponses,
+  GetEventTypeData,
+  GetEventTypeErrors,
+  GetEventTypeResponses,
   GetOwnerData,
   GetOwnerResponses,
   ListEventTypesData,
@@ -54,6 +57,17 @@ export const createEventType = <ThrowOnError extends boolean = false>(
       'Content-Type': 'application/json',
       ...options.headers,
     },
+  });
+
+/**
+ * Returns one Event Type by its identifier.
+ */
+export const getEventType = <ThrowOnError extends boolean = false>(
+  options: Options<GetEventTypeData, ThrowOnError>,
+): RequestResult<GetEventTypeResponses, GetEventTypeErrors, ThrowOnError> =>
+  (options.client ?? client).get<GetEventTypeResponses, GetEventTypeErrors, ThrowOnError>({
+    url: '/event-types/{id}',
+    ...options,
   });
 
 /**
