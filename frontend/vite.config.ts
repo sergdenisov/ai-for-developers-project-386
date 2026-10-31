@@ -15,5 +15,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // A browser zone far from the Owner Time Zone, so that times shown in the browser's zone fail the tests.
+    env: { TZ: 'America/New_York' },
   },
 });

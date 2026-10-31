@@ -1,4 +1,4 @@
-import { Alert, Anchor, Stack, Text, Title } from '@mantine/core';
+import { Alert, Anchor, Box, Stack, Text, Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 
@@ -7,6 +7,7 @@ import {
   getOwnerOptions,
 } from '../api/generated/@tanstack/react-query.gen.ts';
 import type { GetEventTypeError } from '../api/generated/index.ts';
+import { FreeSlotsCalendar } from '../components/FreeSlotsCalendar.tsx';
 import { formatDuration } from '../duration.ts';
 
 function EventTypeNotFound() {
@@ -46,6 +47,12 @@ export function EventTypePage() {
           <Text c="dimmed">{formatDuration(eventType.durationMinutes)}</Text>
           {eventType.description !== undefined && <Text>{eventType.description}</Text>}
         </Stack>
+      )}
+
+      {eventType !== undefined && owner !== undefined && (
+        <Box pt="xl">
+          <FreeSlotsCalendar eventTypeId={eventType.id} timeZone={owner.timeZone} />
+        </Box>
       )}
     </>
   );
