@@ -26,7 +26,7 @@ A Guest's reservation of a Slot of an Event Type (UI: «Запись»).
 _Avoid_: Event, appointment, reservation, meeting
 
 **Upcoming Booking**:
-A Booking whose Slot has not started yet; the Owner sees these in the admin area.
+A Booking whose Slot has not ended yet, including a call in progress; the Owner sees these in the admin area.
 
 **Slot**:
 A period of an Event Type's duration that starts on the Slot Grid and lies wholly within Working Hours (UI: «Слот»).
