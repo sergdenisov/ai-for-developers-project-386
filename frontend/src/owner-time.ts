@@ -30,3 +30,12 @@ export function formatTime(moment: string, timeZone: string) {
 export function formatDate(date: string) {
   return dayjs(date).locale('ru').format('D MMMM');
 }
+
+/** A Slot for people, in the zone and labelled with it: `3 ноября, 10:00–10:30 МСК`. */
+export function formatSlot(
+  { startsAt, endsAt }: { startsAt: string; endsAt: string },
+  timeZone: string,
+) {
+  const date = dayjs(startsAt).tz(timeZone).locale('ru').format('D MMMM');
+  return `${date}, ${formatTime(startsAt, timeZone)}–${formatTime(endsAt, timeZone)} ${zoneLabel(timeZone)}`;
+}

@@ -7,7 +7,7 @@ import {
   getOwnerOptions,
 } from '../api/generated/@tanstack/react-query.gen.ts';
 import type { GetEventTypeError } from '../api/generated/index.ts';
-import { FreeSlotsCalendar } from '../components/FreeSlotsCalendar.tsx';
+import { BookingFlow } from '../components/BookingFlow.tsx';
 import { formatDuration } from '../duration.ts';
 
 function EventTypeNotFound() {
@@ -51,7 +51,7 @@ export function EventTypePage() {
 
       {eventType !== undefined && owner !== undefined && (
         <Box pt="xl">
-          <FreeSlotsCalendar eventTypeId={eventType.id} timeZone={owner.timeZone} />
+          <BookingFlow eventType={eventType} timeZone={owner.timeZone} />
         </Box>
       )}
     </>
