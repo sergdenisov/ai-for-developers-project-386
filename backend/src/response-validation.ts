@@ -32,6 +32,10 @@ function sealObjects(schema: unknown): unknown {
  * 500 error. Fastify itself only serializes responses and never validates them; this check is for tests and is
  * off in a normal run.
  *
+ * The check sees the body the handler sent, before serialization: Fastify's serializer drops the properties a schema
+ * does not list and coerces values to the declared types, which would hide exactly the mistakes the check is for.
+ * So it covers object bodies; a handler that sends a ready string skips it, and no handler does.
+ *
  * Call it before registering fastify-openapi-glue so that the hook applies to the routes glue creates.
  */
 export function addResponseValidation(fastify: FastifyInstance) {
@@ -47,7 +51,7 @@ export function addResponseValidation(fastify: FastifyInstance) {
     );
   }
 
-  fastify.addHook('onSend', async (request, reply, payload) => {
+  fastify.addHook('preSerialization', async (request, reply, payload: unknown) => {
     const responses = request.routeOptions.schema?.response as ResponseSchemas | undefined;
     // Not a contract operation, or the 500 this hook has just caused.
     if (responses === undefined || failed.has(request)) {
@@ -59,7 +63,8 @@ export function addResponseValidation(fastify: FastifyInstance) {
       throw violation(request, `status ${reply.statusCode} is not declared`);
     }
 
-    const contentType = String(reply.getHeader('content-type') ?? '').split(';')[0];
+    // The serializer sets JSON as the content type later, unless the handler has chosen another.
+    const contentType = String(reply.getHeader('content-type') ?? 'application/json').split(';')[0];
     const schema = declared.content?.[contentType]?.schema;
     if (schema === undefined) {
       throw violation(request, `content type "${contentType}" is not declared`);
@@ -70,7 +75,8 @@ export function addResponseValidation(fastify: FastifyInstance) {
       validate = ajv.compile(sealObjects(schema) as object);
       validators.set(schema, validate);
     }
-    if (!validate(JSON.parse(String(payload)))) {
+    // The body as JSON gives it (a `Date` as a string, no `undefined` properties), but nothing dropped or coerced.
+    if (!validate(JSON.parse(JSON.stringify(payload)))) {
       throw violation(request, `body ${ajv.errorsText(validate.errors)}`);
     }
 

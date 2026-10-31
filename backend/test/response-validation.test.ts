@@ -49,11 +49,9 @@ test('fails a response with a status code the operation does not declare', async
 });
 
 test('fails a response with a field the contract does not declare', async () => {
-  // A string payload skips the serializer, which would otherwise drop the field.
-  const payload = JSON.stringify([{ ...eventType, createdAt: '2026-11-02T10:00:00+03:00' }]);
   app = await listenWith(async (_request, reply) =>
-    // @ts-expect-error -- the generated handler types expect an array of Event Types, not a string.
-    reply.code(200).type('application/json').send(payload),
+    // @ts-expect-error -- the generated handler types already reject a field the contract does not declare.
+    reply.code(200).send([{ ...eventType, createdAt: '2026-11-02T10:00:00+03:00' }]),
   );
 
   const response = await fetch(app.url('/api/event-types'));
@@ -61,5 +59,19 @@ test('fails a response with a field the contract does not declare', async () => 
   expect(response.status).toBe(500);
   expect(await response.json()).toMatchObject({
     message: expect.stringContaining('must NOT have additional properties'),
+  });
+});
+
+test('fails a response with a value of the wrong type', async () => {
+  app = await listenWith(async (_request, reply) =>
+    // @ts-expect-error -- the generated handler types already reject a string duration.
+    reply.code(200).send([{ ...eventType, durationMinutes: '30' }]),
+  );
+
+  const response = await fetch(app.url('/api/event-types'));
+
+  expect(response.status).toBe(500);
+  expect(await response.json()).toMatchObject({
+    message: expect.stringContaining('must be integer'),
   });
 });
