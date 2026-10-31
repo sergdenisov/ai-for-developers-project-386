@@ -1,0 +1,4 @@
+[files]
+# Written by release-please from commit subjects and links with
+# short commit hashes, which typos reads as misspellings (e.g. `ee0f5ba`); see AGENTS.md.
+extend-exclude = ["CHANGELOG.md"]

@@ -1,0 +1,25 @@
+name: release-please
+
+# Keeps a release PR (version.txt, CHANGELOG.md) open on main; merging it tags vX.Y.Z and publishes a GitHub Release.
+# A PR opened with GITHUB_TOKEN does not trigger check.yml; the release PR only touches release files.
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A cancelled run could leave a tag without its GitHub Release.
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # Reads release-please-config.json and .release-please-manifest.json through the API; no checkout needed.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
