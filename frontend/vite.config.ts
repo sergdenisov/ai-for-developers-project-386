@@ -13,6 +13,8 @@ export default defineConfig({
   server: { proxy },
   preview: { proxy },
   test: {
+    // e2e/ holds the browser scenarios, which Playwright runs.
+    include: ['src/**/*.test.{ts,tsx}'],
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     // A browser zone far from the Owner Time Zone, so that times shown in the browser's zone fail the tests.
