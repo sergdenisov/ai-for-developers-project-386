@@ -39,7 +39,7 @@ export function trimGuest(body: unknown) {
 
 const startMessages = {
   'off-grid': 'Начало должно быть на сетке слотов: каждые 15 минут от начала рабочего дня',
-  'outside-working-hours': 'Встреча должна целиком уложиться в рабочие часы',
+  'outside-working-hours': 'Запись должна целиком уложиться в рабочие часы',
   'after-window': 'Записаться можно только на ближайшие 14 дней',
 } as const;
 

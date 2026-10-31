@@ -24,7 +24,7 @@ export function UpcomingBookingsTable({
   }
 
   if (bookings.length === 0) {
-    return <Text c="dimmed">Предстоящих встреч нет</Text>;
+    return <Text c="dimmed">Предстоящих записей нет</Text>;
   }
 
   const zone = zoneLabel(timeZone);

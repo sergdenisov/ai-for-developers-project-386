@@ -197,7 +197,7 @@ describe('rejecting invalid data with field errors', () => {
     ['an id over 50 characters', { id: 'a'.repeat(51) }, { id: 'Не длиннее 50 символов' }],
     ['an id with capitals', { id: 'Intro-Call' }, { id: idFormat }],
     ['an id with a double hyphen', { id: 'intro--call' }, { id: idFormat }],
-    ['an id in Cyrillic', { id: 'встреча' }, { id: idFormat }],
+    ['an id in Cyrillic', { id: 'звонок' }, { id: idFormat }],
     [
       'several invalid fields at once',
       { name: '', durationMinutes: 20 },

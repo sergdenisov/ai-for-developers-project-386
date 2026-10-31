@@ -47,7 +47,7 @@ test('a Guest books the first Free Slot and the Owner sees the Booking among Upc
   page,
 }) => {
   const run = unique();
-  const eventType = { name: `Встреча ${run}`, id: `meeting-${run}` };
+  const eventType = { name: `Звонок ${run}`, id: `call-${run}` };
   const guest = { name: `Гость ${run}`, email: `guest-${run}@example.com` };
 
   await createEventType(page, eventType);
@@ -65,7 +65,7 @@ test('a Guest books the first Free Slot and the Owner sees the Booking among Upc
 
   await page.getByRole('banner').getByRole('link', { name: 'Админка' }).click();
   const booking = page
-    .getByRole('table', { name: 'Предстоящие встречи' })
+    .getByRole('table', { name: 'Предстоящие записи' })
     .getByRole('row')
     .filter({ has: page.getByRole('cell', { name: guest.email }) });
   await expect(booking.getByRole('cell')).toHaveText([

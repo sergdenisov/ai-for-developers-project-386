@@ -36,7 +36,7 @@ beforeEach(() => {
 
 /** The table of Upcoming Bookings, found by its heading. */
 function findTable() {
-  return screen.findByRole('table', { name: 'Предстоящие встречи' });
+  return screen.findByRole('table', { name: 'Предстоящие записи' });
 }
 
 /** The text of every cell, row by row; the first row holds the column headers. */
@@ -71,14 +71,14 @@ test('says there are no Upcoming Bookings instead of an empty table', async () =
   respondWith([]);
   renderApp('/admin');
 
-  expect(await screen.findByText('Предстоящих встреч нет')).toBeDefined();
+  expect(await screen.findByText('Предстоящих записей нет')).toBeDefined();
   expect(screen.queryByRole('table')).toBeNull();
 });
 
 test('asks for the list again when the tab regains focus', async () => {
   respondWith([]);
   renderApp('/admin');
-  await screen.findByText('Предстоящих встреч нет');
+  await screen.findByText('Предстоящих записей нет');
 
   respondWith(upcomingBookings.slice(0, 1));
   // The browser fires `visibilitychange` at the document when the tab is shown again; it bubbles to the window.

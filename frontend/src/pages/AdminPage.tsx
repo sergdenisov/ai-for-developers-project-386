@@ -21,7 +21,7 @@ export function AdminPage() {
       <Stack gap="xl">
         <Stack gap="sm">
           <Title order={2} id={upcomingHeadingId}>
-            Предстоящие встречи
+            Предстоящие записи
           </Title>
           {owner !== undefined && (
             <UpcomingBookingsTable timeZone={owner.timeZone} labelledBy={upcomingHeadingId} />

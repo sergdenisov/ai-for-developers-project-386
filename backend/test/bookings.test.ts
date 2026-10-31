@@ -154,12 +154,12 @@ describe('a request that can never be booked', () => {
     {
       reason: 'before Working Hours',
       startsAt: '2026-11-03T08:45:00+03:00',
-      message: 'Встреча должна целиком уложиться в рабочие часы',
+      message: 'Запись должна целиком уложиться в рабочие часы',
     },
     {
       reason: 'ending after Working Hours',
       startsAt: '2026-11-03T17:15:00+03:00',
-      message: 'Встреча должна целиком уложиться в рабочие часы',
+      message: 'Запись должна целиком уложиться в рабочие часы',
     },
     {
       reason: 'after the Booking Window',
