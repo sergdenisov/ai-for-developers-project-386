@@ -22,7 +22,7 @@ export function zoneLabel(timeZone: string) {
 }
 
 /** The wall-clock time of the moment in the zone: `10:00`. */
-export function formatTime(moment: string, timeZone: string) {
+function formatTime(moment: string, timeZone: string) {
   return dayjs(moment).tz(timeZone).format('HH:mm');
 }
 
@@ -41,19 +41,21 @@ export function formatShortMoment(moment: string, timeZone: string) {
   return `${formatShortDate(moment, timeZone)}, ${formatTime(moment, timeZone)}`;
 }
 
-/** A Slot in the zone for tables, where the zone is in the column header: `2 нояб., 10:00–10:30`. */
-export function formatShortSlot(
+/** The wall-clock times a Slot spans in the zone: `10:00–10:30`. */
+export function formatTimeRange(
   { startsAt, endsAt }: { startsAt: string; endsAt: string },
   timeZone: string,
 ) {
-  return `${formatShortMoment(startsAt, timeZone)}–${formatTime(endsAt, timeZone)}`;
+  return `${formatTime(startsAt, timeZone)}–${formatTime(endsAt, timeZone)}`;
+}
+
+/** A Slot in the zone for tables, where the zone is in the column header: `2 нояб., 10:00–10:30`. */
+export function formatShortSlot(slot: { startsAt: string; endsAt: string }, timeZone: string) {
+  return `${formatShortDate(slot.startsAt, timeZone)}, ${formatTimeRange(slot, timeZone)}`;
 }
 
 /** A Slot for people, in the zone and labelled with it: `3 ноября, 10:00–10:30 МСК`. */
-export function formatSlot(
-  { startsAt, endsAt }: { startsAt: string; endsAt: string },
-  timeZone: string,
-) {
-  const date = dayjs(startsAt).tz(timeZone).locale('ru').format('D MMMM');
-  return `${date}, ${formatTime(startsAt, timeZone)}–${formatTime(endsAt, timeZone)} ${zoneLabel(timeZone)}`;
+export function formatSlot(slot: { startsAt: string; endsAt: string }, timeZone: string) {
+  const date = dayjs(slot.startsAt).tz(timeZone).format('YYYY-MM-DD');
+  return `${formatDate(date)}, ${formatTimeRange(slot, timeZone)} ${zoneLabel(timeZone)}`;
 }

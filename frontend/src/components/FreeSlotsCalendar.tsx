@@ -6,7 +6,7 @@ import { useId } from 'react';
 import { getFreeSlotsOptions } from '../api/generated/@tanstack/react-query.gen.ts';
 import type { FreeSlotsDay, Slot } from '../api/generated/index.ts';
 import { apiErrorOf } from '../errors.ts';
-import { formatDate, formatTime, zoneLabel } from '../owner-time.ts';
+import { formatDate, formatTimeRange, zoneLabel } from '../owner-time.ts';
 
 function DaySlots({
   day,
@@ -28,7 +28,7 @@ function DaySlots({
         {day.slots.map((slot) => (
           <List.Item key={slot.startsAt}>
             <Button variant="default" onClick={() => onSlotChoose(slot)}>
-              {`${formatTime(slot.startsAt, timeZone)}–${formatTime(slot.endsAt, timeZone)}`}
+              {formatTimeRange(slot, timeZone)}
             </Button>
           </List.Item>
         ))}
