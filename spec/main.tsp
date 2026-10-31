@@ -110,7 +110,7 @@ model CreateEventTypeRequest {
   /** Identifier for the booking link; the server assigns a UUID v4 when it is absent. */
   id?: EventTypeId;
 
-  /** Name, unique ignoring case and surrounding spaces; surrounding spaces are trimmed. */
+  /** Name, unique ignoring case and surrounding spaces, which are trimmed before the length is checked. */
   @minLength(1)
   @maxLength(100)
   name: string;

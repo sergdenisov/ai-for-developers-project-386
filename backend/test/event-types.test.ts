@@ -78,6 +78,15 @@ describe('creating an Event Type', () => {
     });
   });
 
+  test('checks the length of the name after trimming it', async () => {
+    const name = 'я'.repeat(100);
+
+    const response = await createEventType({ name: ` ${name} `, durationMinutes: 30 });
+
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({ name });
+  });
+
   test('silently drops fields the contract does not list', async () => {
     // The response serializer would hide extra fields anyway, so also look at what reaches the handlers.
     await app.close();

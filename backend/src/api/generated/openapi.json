@@ -372,7 +372,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 100,
-            "description": "Name, unique ignoring case and surrounding spaces; surrounding spaces are trimmed."
+            "description": "Name, unique ignoring case and surrounding spaces, which are trimmed before the length is checked."
           },
           "description": {
             "type": "string",

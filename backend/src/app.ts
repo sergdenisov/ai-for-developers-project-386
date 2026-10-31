@@ -5,7 +5,7 @@ import type { RouteHandlers } from './api/generated/fastify.gen.js';
 import specification from './api/generated/openapi.json' with { type: 'json' };
 import { createBookingStore, type StoredBooking, trimGuest } from './bookings.js';
 import { addErrorHandling, apiError, validationFailed } from './errors.js';
-import { createEventTypeStore } from './event-types.js';
+import { createEventTypeStore, trimEventTypeName } from './event-types.js';
 import { formatOwnerInstant } from './owner-time.js';
 import { owner } from './owner.js';
 import { addResponseValidation } from './response-validation.js';
@@ -52,11 +52,16 @@ export function buildApp({
   }
   addErrorHandling(fastify);
 
+  // The contract checks the length and format of these fields after trimming them, so they are trimmed first.
+  const trimBody: Record<string, (body: unknown) => void> = {
+    createEventType: trimEventTypeName,
+    createBooking: trimGuest,
+  };
   fastify.addHook('preValidation', async (request) => {
     // glue copies each operation's `operationId` into its route schema.
     const { operationId } = (request.routeOptions.schema ?? {}) as { operationId?: string };
-    if (operationId === 'createBooking') {
-      trimGuest(request.body);
+    if (operationId !== undefined) {
+      trimBody[operationId]?.(request.body);
     }
   });
 
@@ -103,8 +108,6 @@ export function buildApp({
       switch (outcome.kind) {
         case 'created':
           return reply.code(201).send(outcome.eventType);
-        case 'invalid':
-          return reply.code(400).send(validationFailed(outcome.fields));
         case 'taken':
           return reply.code(409).send(apiError(outcome.code, outcome.message));
       }

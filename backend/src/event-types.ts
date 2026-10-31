@@ -4,8 +4,6 @@ import type { CreateEventTypeRequest, EventType } from './api/generated/index.js
 
 export type CreateOutcome =
   | { kind: 'created'; eventType: EventType }
-  /** Breaks a rule the contract schema cannot express; one message per field. */
-  | { kind: 'invalid'; fields: Record<string, string> }
   /** Conflicts with an existing Event Type. */
   | { kind: 'taken'; code: 'EVENT_TYPE_ID_TAKEN' | 'EVENT_TYPE_NAME_TAKEN'; message: string };
 
@@ -15,8 +13,23 @@ function nameKey(name: string) {
 }
 
 /**
- * Event Types in memory, in creation order. The contract schema has already checked the request; this applies the
- * rules it cannot express.
+ * Trims the name in a raw `createEventType` body, in place. The contract checks its length after trimming, so this
+ * runs before the request is validated; a name that is not a string is left for the validation to report. The id is
+ * never corrected, and a blank description already means none, so neither is trimmed.
+ */
+export function trimEventTypeName(body: unknown) {
+  if (typeof body !== 'object' || body === null) {
+    return;
+  }
+  const fields = body as Record<string, unknown>;
+  if (typeof fields.name === 'string') {
+    fields.name = fields.name.trim();
+  }
+}
+
+/**
+ * Event Types in memory, in creation order. The contract schema has already checked the request, its name trimmed
+ * (`trimEventTypeName`); this applies the rules it cannot express.
  */
 export function createEventTypeStore() {
   const eventTypes: EventType[] = [];
@@ -27,10 +40,7 @@ export function createEventTypeStore() {
     get: (id: string): EventType | undefined => eventTypes.find((eventType) => eventType.id === id),
 
     create(request: CreateEventTypeRequest): CreateOutcome {
-      const name = request.name.trim();
-      if (name === '') {
-        return { kind: 'invalid', fields: { name: 'Не может быть пустым' } };
-      }
+      const { name } = request;
       if (request.id !== undefined && eventTypes.some(({ id }) => id === request.id)) {
         return {
           kind: 'taken',

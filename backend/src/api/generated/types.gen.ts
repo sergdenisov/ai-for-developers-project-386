@@ -70,7 +70,7 @@ export type CreateEventTypeRequest = {
    */
   id?: EventTypeId;
   /**
-   * Name, unique ignoring case and surrounding spaces; surrounding spaces are trimmed.
+   * Name, unique ignoring case and surrounding spaces, which are trimmed before the length is checked.
    */
   name: string;
   /**
