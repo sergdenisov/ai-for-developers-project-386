@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import type { StoredBooking } from '../src/bookings.js';
 import {
   bookingWindow,
   checkBooking,
@@ -261,8 +262,15 @@ describe('checking a new Booking', () => {
 });
 
 /** A Booking named `id` from one Moscow wall time to another. */
-function namedBooking(id: string, startsAt: string, endsAt: string) {
-  return { id, startsAt: moscow(startsAt), endsAt: moscow(endsAt) };
+function namedBooking(id: string, startsAt: string, endsAt: string): StoredBooking {
+  return {
+    id,
+    eventType: { id: 'intro-call', name: 'Знакомство' },
+    startsAt: moscow(startsAt),
+    endsAt: moscow(endsAt),
+    guest: { name: 'Анна', email: 'anna@example.com' },
+    createdAt: moscow('2026-11-01T12:00:00'),
+  };
 }
 
 describe('Upcoming Bookings', () => {

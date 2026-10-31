@@ -1,3 +1,4 @@
+import type { StoredBooking } from './bookings.js';
 import { addDays, ownerDate, ownerInstant, ownerMinuteOfDay } from './owner-time.js';
 import { owner } from './owner.js';
 
@@ -34,7 +35,7 @@ export function overlaps(a: Period, b: Period): boolean {
  * The Upcoming Bookings among `bookings`, nearest first: those that have not ended, a call in progress included. A
  * Booking that ends exactly now has ended.
  */
-export function upcoming<T extends Period>(bookings: readonly T[], now: Date): T[] {
+export function upcoming(bookings: readonly StoredBooking[], now: Date): StoredBooking[] {
   return bookings
     .filter((booking) => booking.endsAt.getTime() > now.getTime())
     .toSorted((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
