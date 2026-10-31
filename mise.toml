@@ -111,7 +111,7 @@ run = ["npm run typecheck --prefix backend", "npm run typecheck --prefix fronten
 [tasks."check:unused"]
 description = "Find unused files, exports and dependencies"
 wait_for = ["check:contract"]
-run = ["knip", "knip --directory backend", "knip --directory frontend"]
+run = ["knip", "knip --directory spec", "knip --directory backend", "knip --directory frontend"]
 
 [tasks."check:test"]
 description = "Run tests"

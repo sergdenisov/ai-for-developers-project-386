@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // Exception, human decision in the review of the feat/booking branch: Knip cannot see the imports in `.tsp` files
+  // (`@typespec/http` and `@typespec/json-schema` in main.tsp) or the emitters in tspconfig.yaml (`@typespec/openapi3`).
+  "ignoreDependencies": ["@typespec/http", "@typespec/json-schema", "@typespec/openapi3"]
+}
