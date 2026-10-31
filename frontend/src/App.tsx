@@ -1,6 +1,7 @@
 import '@mantine/core/styles.css';
 
 import { MantineProvider } from '@mantine/core';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router';
 
 import { AppLayout } from './layouts/AppLayout.tsx';
@@ -22,12 +23,16 @@ export function AppRoutes() {
   );
 }
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
     <MantineProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </QueryClientProvider>
     </MantineProvider>
   );
 }
