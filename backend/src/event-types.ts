@@ -5,7 +5,7 @@ import type { CreateEventTypeRequest, EventType } from './api/generated/index.js
 export type CreateOutcome =
   | { kind: 'created'; eventType: EventType }
   /** Conflicts with an existing Event Type. */
-  | { kind: 'taken'; code: 'EVENT_TYPE_ID_TAKEN' | 'EVENT_TYPE_NAME_TAKEN'; message: string };
+  | { kind: 'conflict'; code: 'EVENT_TYPE_ID_TAKEN' | 'EVENT_TYPE_NAME_TAKEN'; message: string };
 
 /** Names are unique ignoring letter case and surrounding spaces. */
 function nameKey(name: string) {
@@ -43,14 +43,14 @@ export function createEventTypeStore() {
       const { name } = request;
       if (request.id !== undefined && eventTypes.some(({ id }) => id === request.id)) {
         return {
-          kind: 'taken',
+          kind: 'conflict',
           code: 'EVENT_TYPE_ID_TAKEN',
           message: 'Такой идентификатор уже занят',
         };
       }
       if (eventTypes.some((eventType) => nameKey(eventType.name) === nameKey(name))) {
         return {
-          kind: 'taken',
+          kind: 'conflict',
           code: 'EVENT_TYPE_NAME_TAKEN',
           message: 'Тип события с таким названием уже есть',
         };

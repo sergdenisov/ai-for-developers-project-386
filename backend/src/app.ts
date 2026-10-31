@@ -108,7 +108,7 @@ export function buildApp({
       switch (outcome.kind) {
         case 'created':
           return reply.code(201).send(outcome.eventType);
-        case 'taken':
+        case 'conflict':
           return reply.code(409).send(apiError(outcome.code, outcome.message));
       }
     },
