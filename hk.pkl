@@ -19,6 +19,12 @@ local linters = new Mapping<String, Step> {
   // Secrets in changed files; the whole git history is scanned by `mise run check:secrets`.
   ["betterleaks"] = Builtins.betterleaks
   ["typos"] = Builtins.typos
+  // TypeSpec contract; the compiler is installed in the spec package.
+  ["tsp-format"] {
+    glob = List("**/*.tsp")
+    check = "spec/node_modules/.bin/tsp format --check {{files}}"
+    fix = "spec/node_modules/.bin/tsp format {{files}}"
+  }
   // Markdown lint and format; settings and exclusions are in .rumdl.toml.
   ["rumdl"] = Builtins.rumdl
   ["rumdl-format"] = Builtins.rumdl_format
