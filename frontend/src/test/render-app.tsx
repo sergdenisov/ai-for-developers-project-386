@@ -1,4 +1,5 @@
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
@@ -11,6 +12,7 @@ export function renderApp(path: string) {
 
   return render(
     <MantineProvider env="test">
+      <Notifications />
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={[path]}>
           <AppRoutes />
