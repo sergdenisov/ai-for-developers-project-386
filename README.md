@@ -40,16 +40,28 @@ mise daemons logs backend     # логи (backend или frontend)
 mise daemons restart frontend # перезапуск
 mise daemons stop             # остановить всё
 
-mise run check   # все проверки, как в CI
-mise run fix     # безопасные автоисправления (форматирование и т. п.)
-mise run build   # сборка бэкенда и фронтенда
-mise run start   # сборка и запуск собранного бэкенда
-mise tasks       # все задачи
+mise run check       # все проверки, как в CI, включая браузерные сценарии
+mise run check:e2e   # только браузерные сценарии (Playwright) на собранном приложении
+mise run fix         # безопасные автоисправления (форматирование и т. п.)
+mise run build       # сборка бэкенда и фронтенда
+mise run start       # сборка и запуск собранного бэкенда
+mise tasks           # все задачи
 ```
 
 Dev-серверы работают как daemons mise под управлением [pitchfork](https://pitchfork.jdx.dev/), поэтому их можно
 запускать, останавливать и смотреть их состояние из любого терминала. Порты задаются в `mise.toml`
 (`BACKEND_PORT`, `FRONTEND_PORT`).
+
+### Браузерные сценарии
+
+`mise run check:e2e` собирает бэкенд и фронтенд и прогоняет сценарии Playwright из `frontend/e2e/` в Chromium:
+Owner создаёт тип события, Guest записывается на первый свободный слот, а Owner видит запись среди предстоящих
+встреч; две вкладки выбирают один слот, и вторая получает сообщение о конфликте. Сценарии работают с настоящим
+сервером без подмены ответов: Playwright сам запускает собранный бэкенд с флагом `--validate-responses` (ответ не по
+контракту превращается в ошибку 500) и `vite preview` на отдельных портах, поэтому dev-серверы можно не
+останавливать. Задача входит в `mise run check`, но не в хук pre-push. Chromium ставит `mise run install`. Если
+сценарий упал, отчёт лежит в `frontend/playwright-report/` (`npx playwright show-report` в `frontend`), а в CI он
+загружается артефактом `playwright-report`.
 
 ### Контракт API
 

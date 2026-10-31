@@ -29,12 +29,13 @@ typos = "1.51.1"
 postinstall = { task = "install" }
 
 [tasks.install]
-description = "Install npm dependencies of every package and git hooks"
+description = "Install npm dependencies of every package, Chromium for the browser tests and git hooks"
 run = [
   "npm ci",
   "npm ci --prefix spec",
   "npm ci --prefix backend",
   "npm ci --prefix frontend",
+  "npm exec --prefix frontend -- playwright install chromium",
   "hk install --mise",
 ]
 
@@ -117,13 +118,19 @@ description = "Run tests"
 wait_for = ["check:contract"]
 run = ["npm test --prefix backend", "npm test --prefix frontend"]
 
+# Not in `check:project`, so the pre-push hook does not run it; `check` and CI do.
+[tasks."check:e2e"]
+description = "Browser scenarios (Playwright, Chromium) against the built backend and `vite preview`"
+depends = ["build"]
+run = "npm run test:e2e --prefix frontend"
+
 [tasks."check:project"]
 description = "Whole-project checks: generated contract code, types, unused code, tests"
 depends = ["check:contract", "check:types", "check:unused", "check:test"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:hk", "check:secrets", "check:network", "check:project", "build"]
+depends = ["check:hk", "check:secrets", "check:network", "check:project", "check:e2e"]
 
 [tasks.fix]
 description = "Apply safe autofixes"

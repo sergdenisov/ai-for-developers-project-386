@@ -35,7 +35,14 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 
 ## Checks
 
-- Run `mise run check` before you call a change done. It must pass: CI runs the same command.
+- Run `mise run check` before you call a change done. It runs every check, the browser scenarios included, and it
+  must pass: CI runs the same command. The pre-push hook runs only `check:project`, without the browser scenarios.
+- `mise run check:e2e` builds both packages and runs the Playwright scenarios in `frontend/e2e/` (Chromium) against
+  the built backend started with `--validate-responses` and `vite preview`, on ports of their own
+  (`frontend/playwright.config.ts`), so the dev daemons can stay up.
+- Browser scenarios talk to the real server only: no `page.route`, no mocked responses. One server serves the whole
+  run, so a scenario creates Event Types with unique names and ids, never assumes an empty list, and picks its day
+  from the calendar, because time is real.
 - Run `mise run fix` for safe autofixes (formatting, Markdown, lint fixes).
 - Tool versions are pinned in `mise.toml`; git hooks are defined in `hk.pkl`.
 - Do not bypass hooks with `--no-verify`.
