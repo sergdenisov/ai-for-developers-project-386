@@ -14,7 +14,7 @@
     "@typespec/http": "^1.17.0",
     "@typespec/json-schema": "^1.17.0",
     "@typespec/openapi3": "^1.17.0",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "overrides": {
     "@hey-api/json-schema-ref-parser": {
