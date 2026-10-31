@@ -51,6 +51,26 @@ Dev-серверы работают как daemons mise под управлен�
 запускать, останавливать и смотреть их состояние из любого терминала. Порты задаются в `mise.toml`
 (`BACKEND_PORT`, `FRONTEND_PORT`).
 
+### Контракт API
+
+Репозиторий состоит из трёх npm-пакетов: `spec` (контракт на TypeSpec), `backend` и `frontend`. API описывается
+сначала в `spec/main.tsp`, а код по нему генерируется:
+
+```text
+spec/main.tsp ── tsp compile ──> spec/openapi.yaml (OpenAPI 3.0.0)
+                                  ├── openapi-ts ──> frontend/src/api/generated/  SDK: клиент fetch + TanStack Query
+                                  └── openapi-ts ──> backend/src/api/generated/   типы обработчиков + копия контракта
+```
+
+```bash
+mise run generate        # пересобрать OpenAPI, SDK и типы бэкенда после правки spec/main.tsp
+mise run check:contract  # проверить, что закоммиченное сгенерированное совпадает с контрактом
+```
+
+Сгенерированные файлы коммитятся и руками не правятся (ADR 0003). Бэкенд отдаёт API под `/api`, а Vite в dev и в
+`vite preview` проксирует `/api` на бэкенд. API-тесты запускают приложение с `validateResponses`: ответ, которого нет
+в контракте, превращается в ошибку 500.
+
 ## Коммиты
 
 Сообщения коммитов пишем по [Conventional Commits](https://www.conventionalcommits.org/ru/v1.0.0/):
