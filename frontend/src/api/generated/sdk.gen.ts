@@ -2,7 +2,15 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { ListEventTypesData, ListEventTypesResponses } from './types.gen';
+import type {
+  CreateEventTypeData,
+  CreateEventTypeErrors,
+  CreateEventTypeResponses,
+  GetOwnerData,
+  GetOwnerResponses,
+  ListEventTypesData,
+  ListEventTypesResponses,
+} from './types.gen';
 
 export type Options<
   TData extends TDataShape = TDataShape,
@@ -30,5 +38,31 @@ export const listEventTypes = <ThrowOnError extends boolean = false>(
 ): RequestResult<ListEventTypesResponses, unknown, ThrowOnError> =>
   (options?.client ?? client).get<ListEventTypesResponses, unknown, ThrowOnError>({
     url: '/event-types',
+    ...options,
+  });
+
+/**
+ * Creates an Event Type; it goes to the end of the list.
+ */
+export const createEventType = <ThrowOnError extends boolean = false>(
+  options: Options<CreateEventTypeData, ThrowOnError>,
+): RequestResult<CreateEventTypeResponses, CreateEventTypeErrors, ThrowOnError> =>
+  (options.client ?? client).post<CreateEventTypeResponses, CreateEventTypeErrors, ThrowOnError>({
+    url: '/event-types',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+/**
+ * Returns the Owner profile: name, time zone, Working Hours and Booking Window length.
+ */
+export const getOwner = <ThrowOnError extends boolean = false>(
+  options?: Options<GetOwnerData, ThrowOnError>,
+): RequestResult<GetOwnerResponses, unknown, ThrowOnError> =>
+  (options?.client ?? client).get<GetOwnerResponses, unknown, ThrowOnError>({
+    url: '/owner',
     ...options,
   });

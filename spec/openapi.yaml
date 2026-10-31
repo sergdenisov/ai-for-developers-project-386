@@ -19,8 +19,104 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EventType'
+    post:
+      operationId: createEventType
+      description: Creates an Event Type; it goes to the end of the list.
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventType'
+        '400':
+          description: The request data can never be accepted in this form.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: The request conflicts with data already on the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventTypeRequest'
+  /owner:
+    get:
+      operationId: getOwner
+      description: 'Returns the Owner profile: name, time zone, Working Hours and Booking Window length.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
 components:
   schemas:
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+          description: Message in Russian, ready to show.
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+          description: One message in Russian per invalid field; nested fields use dots (`guest.email`).
+      description: The one shape of every error response.
+    CreateEventTypeRequest:
+      type: object
+      required:
+        - name
+        - durationMinutes
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/EventTypeId'
+          description: Identifier for the booking link; the server assigns a UUID v4 when it is absent.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Name, unique ignoring case and surrounding spaces; surrounding spaces are trimmed.
+        description:
+          type: string
+          maxLength: 1000
+          description: Description; an empty or blank one means there is none.
+        durationMinutes:
+          $ref: '#/components/schemas/DurationMinutes'
+      description: Data of a new Event Type. Unknown fields are dropped.
+    DurationMinutes:
+      type: integer
+      format: int32
+      minimum: 15
+      maximum: 540
+      multipleOf: 15
+      description: 'Duration of an Event Type in minutes: a multiple of 15 that fits within Working Hours.'
+    ErrorCode:
+      type: string
+      enum:
+        - VALIDATION_FAILED
+        - NOT_FOUND
+        - EVENT_TYPE_ID_TAKEN
+        - EVENT_TYPE_NAME_TAKEN
+        - INTERNAL_ERROR
+      description: Machine-readable reason of an error; clients choose their reaction by it, not by the text.
     EventType:
       type: object
       required:
@@ -42,3 +138,44 @@ components:
           format: int32
           description: Duration in minutes, a multiple of 15.
       description: A template for a call that Guests can book.
+    EventTypeId:
+      type: string
+      minLength: 1
+      maxLength: 50
+      pattern: ^[a-z0-9]+(-[a-z0-9]+)*$
+      description: 'Identifier of an Event Type: lowercase Latin letters and digits, words joined by single hyphens.'
+    Owner:
+      type: object
+      required:
+        - name
+        - timeZone
+        - workingHours
+        - bookingWindowDays
+      properties:
+        name:
+          type: string
+        timeZone:
+          type: string
+          description: IANA time zone in which all times are shown.
+        workingHours:
+          $ref: '#/components/schemas/WorkingHours'
+        bookingWindowDays:
+          type: integer
+          format: int32
+          description: Number of days, today included, that Guests can book.
+      description: The one person whose calendar is booked.
+    WallTime:
+      type: string
+      pattern: ^([01][0-9]|2[0-3]):[0-5][0-9]$
+      description: Wall-clock time `HH:mm` in the Owner Time Zone.
+    WorkingHours:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          $ref: '#/components/schemas/WallTime'
+        end:
+          $ref: '#/components/schemas/WallTime'
+      description: The daily period in which Slots lie.

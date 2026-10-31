@@ -5,6 +5,57 @@ export type ClientOptions = {
 };
 
 /**
+ * The one shape of every error response.
+ */
+export type ApiError = {
+  code: ErrorCode;
+  /**
+   * Message in Russian, ready to show.
+   */
+  message: string;
+  /**
+   * One message in Russian per invalid field; nested fields use dots (`guest.email`).
+   */
+  fields?: {
+    [key: string]: string;
+  };
+};
+
+/**
+ * Data of a new Event Type. Unknown fields are dropped.
+ */
+export type CreateEventTypeRequest = {
+  /**
+   * Identifier for the booking link; the server assigns a UUID v4 when it is absent.
+   */
+  id?: EventTypeId;
+  /**
+   * Name, unique ignoring case and surrounding spaces; surrounding spaces are trimmed.
+   */
+  name: string;
+  /**
+   * Description; an empty or blank one means there is none.
+   */
+  description?: string;
+  durationMinutes: DurationMinutes;
+};
+
+/**
+ * Duration of an Event Type in minutes: a multiple of 15 that fits within Working Hours.
+ */
+export type DurationMinutes = number;
+
+/**
+ * Machine-readable reason of an error; clients choose their reaction by it, not by the text.
+ */
+export type ErrorCode =
+  | 'VALIDATION_FAILED'
+  | 'NOT_FOUND'
+  | 'EVENT_TYPE_ID_TAKEN'
+  | 'EVENT_TYPE_NAME_TAKEN'
+  | 'INTERNAL_ERROR';
+
+/**
  * A template for a call that Guests can book.
  */
 export type EventType = {
@@ -26,6 +77,40 @@ export type EventType = {
   durationMinutes: number;
 };
 
+/**
+ * Identifier of an Event Type: lowercase Latin letters and digits, words joined by single hyphens.
+ */
+export type EventTypeId = string;
+
+/**
+ * The one person whose calendar is booked.
+ */
+export type Owner = {
+  name: string;
+  /**
+   * IANA time zone in which all times are shown.
+   */
+  timeZone: string;
+  workingHours: WorkingHours;
+  /**
+   * Number of days, today included, that Guests can book.
+   */
+  bookingWindowDays: number;
+};
+
+/**
+ * Wall-clock time `HH:mm` in the Owner Time Zone.
+ */
+export type WallTime = string;
+
+/**
+ * The daily period in which Slots lie.
+ */
+export type WorkingHours = {
+  start: WallTime;
+  end: WallTime;
+};
+
 export type ListEventTypesData = {
   body?: never;
   path?: never;
@@ -41,3 +126,48 @@ export type ListEventTypesResponses = {
 };
 
 export type ListEventTypesResponse = ListEventTypesResponses[keyof ListEventTypesResponses];
+
+export type CreateEventTypeData = {
+  body: CreateEventTypeRequest;
+  path?: never;
+  query?: never;
+  url: '/event-types';
+};
+
+export type CreateEventTypeErrors = {
+  /**
+   * The request data can never be accepted in this form.
+   */
+  400: ApiError;
+  /**
+   * The request conflicts with data already on the server.
+   */
+  409: ApiError;
+};
+
+export type CreateEventTypeError = CreateEventTypeErrors[keyof CreateEventTypeErrors];
+
+export type CreateEventTypeResponses = {
+  /**
+   * The request has succeeded and a new resource has been created as a result.
+   */
+  201: EventType;
+};
+
+export type CreateEventTypeResponse = CreateEventTypeResponses[keyof CreateEventTypeResponses];
+
+export type GetOwnerData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/owner';
+};
+
+export type GetOwnerResponses = {
+  /**
+   * The request has succeeded.
+   */
+  200: Owner;
+};
+
+export type GetOwnerResponse = GetOwnerResponses[keyof GetOwnerResponses];
