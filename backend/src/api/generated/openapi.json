@@ -1,0 +1,557 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Call Booking API",
+    "description": "API of the call booking service. Paths here have no prefix; the backend serves them under `/api`.",
+    "version": "0.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/bookings": {
+      "post": {
+        "operationId": "createBooking",
+        "description": "Books a Free Slot. Checks, in order: the request shape (`400`), the Event Type (`404`), the start on the Slot Grid\nwithin Working Hours and the Booking Window (`400` with `fields.startsAt`), a Slot that has started\n(`409 SLOT_STARTED`), an overlap with a Booking of any Event Type (`409 SLOT_UNAVAILABLE`).",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "The request has succeeded and a new resource has been created as a result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request data can never be accepted in this form.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with data already on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookingRequest"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listUpcoming",
+        "description": "Lists the Upcoming Bookings of every Event Type: those whose Slot has not ended yet, a call in progress included,\nnearest first.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Booking"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/event-types": {
+      "get": {
+        "operationId": "listEventTypes",
+        "description": "Lists all Event Types in creation order, oldest first.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createEventType",
+        "description": "Creates an Event Type; it goes to the end of the list.",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "The request has succeeded and a new resource has been created as a result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventType"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request data can never be accepted in this form.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with data already on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventTypeRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/event-types/{id}": {
+      "get": {
+        "operationId": "getEventType",
+        "description": "Returns one Event Type by its identifier.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventType"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/event-types/{id}/free-slots": {
+      "get": {
+        "operationId": "getFreeSlots",
+        "description": "Returns the Free Slots of an Event Type on every day of the Booking Window: a snapshot that is not cached.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "headers": {
+              "Cache-Control": {
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "enum": ["no-store"]
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FreeSlots"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/owner": {
+      "get": {
+        "operationId": "getOwner",
+        "description": "Returns the Owner profile: name, time zone, Working Hours and Booking Window length.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Owner"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message in Russian, ready to show."
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "One message in Russian per invalid field; nested fields use dots (`guest.email`)."
+          }
+        },
+        "description": "The one shape of every error response."
+      },
+      "BookedEventType": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "description": "The Event Type of a Booking: a copy of its identifier and name."
+      },
+      "Booking": {
+        "type": "object",
+        "required": ["id", "eventType", "startsAt", "endsAt", "guest", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/BookedEventType"
+          },
+          "startsAt": {
+            "$ref": "#/components/schemas/Moment"
+          },
+          "endsAt": {
+            "$ref": "#/components/schemas/Moment"
+          },
+          "guest": {
+            "$ref": "#/components/schemas/Guest"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Moment"
+          }
+        },
+        "description": "A Guest's reservation of a Slot of an Event Type."
+      },
+      "BookingWindow": {
+        "type": "object",
+        "required": ["firstDate", "lastDate"],
+        "properties": {
+          "firstDate": {
+            "$ref": "#/components/schemas/OwnerDate"
+          },
+          "lastDate": {
+            "$ref": "#/components/schemas/OwnerDate"
+          }
+        },
+        "description": "The days a Guest can book: today in the Owner Time Zone and the days after it."
+      },
+      "CreateBookingRequest": {
+        "type": "object",
+        "required": ["eventTypeId", "startsAt", "guest"],
+        "properties": {
+          "eventTypeId": {
+            "type": "string"
+          },
+          "startsAt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Moment"
+              }
+            ],
+            "description": "Start of a Free Slot of the Event Type."
+          },
+          "guest": {
+            "$ref": "#/components/schemas/Guest"
+          }
+        },
+        "description": "Data of a new Booking; the server works out its end from the Event Type duration. Unknown fields are dropped."
+      },
+      "CreateEventTypeRequest": {
+        "type": "object",
+        "required": ["name", "durationMinutes"],
+        "properties": {
+          "id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventTypeId"
+              }
+            ],
+            "description": "Identifier for the booking link; the server assigns a UUID v4 when it is absent."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name, unique ignoring case and surrounding spaces, which are trimmed before the length is checked."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Description; an empty or blank one means there is none."
+          },
+          "durationMinutes": {
+            "$ref": "#/components/schemas/DurationMinutes"
+          }
+        },
+        "description": "Data of a new Event Type. Unknown fields are dropped."
+      },
+      "DurationMinutes": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 15,
+        "maximum": 540,
+        "multipleOf": 15,
+        "description": "Duration of an Event Type in minutes: a multiple of 15 that fits within Working Hours."
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "VALIDATION_FAILED",
+          "NOT_FOUND",
+          "EVENT_TYPE_ID_TAKEN",
+          "EVENT_TYPE_NAME_TAKEN",
+          "SLOT_STARTED",
+          "SLOT_UNAVAILABLE",
+          "INTERNAL_ERROR"
+        ],
+        "description": "Machine-readable reason of an error; clients choose their reaction by it, not by the text."
+      },
+      "EventType": {
+        "type": "object",
+        "required": ["id", "name", "durationMinutes"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier that appears in the booking link `/book/{id}`."
+          },
+          "name": {
+            "type": "string",
+            "description": "Unique name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description; absent when there is none."
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Duration in minutes, a multiple of 15."
+          }
+        },
+        "description": "A template for a call that Guests can book."
+      },
+      "EventTypeId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "description": "Identifier of an Event Type: lowercase Latin letters and digits, words joined by single hyphens."
+      },
+      "FreeSlots": {
+        "type": "object",
+        "required": ["window", "days"],
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/BookingWindow"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FreeSlotsDay"
+            },
+            "description": "Every day of the window in order, days without Free Slots included."
+          }
+        },
+        "description": "The Free Slots of an Event Type over the Booking Window."
+      },
+      "FreeSlotsDay": {
+        "type": "object",
+        "required": ["date", "slots"],
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/OwnerDate"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          }
+        },
+        "description": "The Free Slots of one day, ordered by start; empty when the day has none."
+      },
+      "Guest": {
+        "type": "object",
+        "required": ["name", "email"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name; surrounding spaces are trimmed before the length is checked."
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "description": "Email; surrounding spaces are trimmed before it is checked, letter case is kept."
+          }
+        },
+        "description": "The person who books a Slot; has no account."
+      },
+      "Moment": {
+        "type": "string",
+        "format": "date-time",
+        "description": "A moment as RFC 3339. Responses give it in the Owner Time Zone to whole seconds, `2026-11-02T10:00:00+03:00`;\nrequests may use any offset, but must have one."
+      },
+      "Owner": {
+        "type": "object",
+        "required": ["name", "timeZone", "workingHours", "bookingWindowDays"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "IANA time zone in which all times are shown."
+          },
+          "workingHours": {
+            "$ref": "#/components/schemas/WorkingHours"
+          },
+          "bookingWindowDays": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of days, today included, that Guests can book."
+          }
+        },
+        "description": "The one person whose calendar is booked."
+      },
+      "OwnerDate": {
+        "type": "string",
+        "format": "date",
+        "description": "A calendar day `YYYY-MM-DD` in the Owner Time Zone."
+      },
+      "Slot": {
+        "type": "object",
+        "required": ["startsAt", "endsAt"],
+        "properties": {
+          "startsAt": {
+            "$ref": "#/components/schemas/Moment"
+          },
+          "endsAt": {
+            "$ref": "#/components/schemas/Moment"
+          }
+        },
+        "description": "A period of an Event Type's duration on the Slot Grid within Working Hours; half-open, `[startsAt, endsAt)`."
+      },
+      "WallTime": {
+        "type": "string",
+        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+        "description": "Wall-clock time `HH:mm` in the Owner Time Zone."
+      },
+      "WorkingHours": {
+        "type": "object",
+        "required": ["start", "end"],
+        "properties": {
+          "start": {
+            "$ref": "#/components/schemas/WallTime"
+          },
+          "end": {
+            "$ref": "#/components/schemas/WallTime"
+          }
+        },
+        "description": "The daily period in which Slots lie."
+      }
+    }
+  }
+}

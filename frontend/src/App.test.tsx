@@ -1,18 +1,10 @@
-import { MantineProvider } from '@mantine/core';
-import { render, screen, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { screen, within } from '@testing-library/react';
 import { expect, test } from 'vitest';
 
-import { AppRoutes } from './App.tsx';
+import { renderApp } from './test/render-app.tsx';
 
 test('home page links to booking and the admin area', () => {
-  render(
-    <MantineProvider env="test">
-      <MemoryRouter initialEntries={['/']}>
-        <AppRoutes />
-      </MemoryRouter>
-    </MantineProvider>,
-  );
+  renderApp('/');
 
   const header = within(screen.getByRole('banner'));
   expect(header.getByRole('link', { name: 'Записаться' }).getAttribute('href')).toBe('/book');

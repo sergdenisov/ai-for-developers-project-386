@@ -40,16 +40,50 @@ mise daemons logs backend     # логи (backend или frontend)
 mise daemons restart frontend # перезапуск
 mise daemons stop             # остановить всё
 
-mise run check   # все проверки, как в CI
-mise run fix     # безопасные автоисправления (форматирование и т. п.)
-mise run build   # сборка бэкенда и фронтенда
-mise run start   # сборка и запуск собранного бэкенда
-mise tasks       # все задачи
+mise run check       # все проверки, как в CI, включая браузерные сценарии
+mise run check:e2e   # только браузерные сценарии (Playwright) на собранном приложении
+mise run fix         # безопасные автоисправления (форматирование и т. п.)
+mise run build       # сборка бэкенда и фронтенда
+mise run start       # сборка и запуск собранного бэкенда
+mise tasks           # все задачи
 ```
 
 Dev-серверы работают как daemons mise под управлением [pitchfork](https://pitchfork.jdx.dev/), поэтому их можно
 запускать, останавливать и смотреть их состояние из любого терминала. Порты задаются в `mise.toml`
 (`BACKEND_PORT`, `FRONTEND_PORT`).
+
+### Браузерные сценарии
+
+`mise run check:e2e` собирает бэкенд и фронтенд и прогоняет сценарии Playwright из `frontend/e2e/` в Chromium:
+Owner создаёт тип события, Guest записывается на первый свободный слот, а Owner видит её среди предстоящих
+записей; две вкладки выбирают один слот, и вторая получает сообщение о конфликте. Сценарии работают с настоящим
+сервером без подмены ответов: Playwright сам запускает собранный бэкенд с флагом `--validate-responses` (ответ не по
+контракту превращается в ошибку 500) и `vite preview` на отдельных портах, поэтому dev-серверы можно не
+останавливать. Задача входит в `mise run check`, но не в хук pre-push. Chromium ставит `mise run install`. Если
+сценарий упал, отчёт лежит в `frontend/playwright-report/` (`npx playwright show-report` в `frontend`), а в CI он
+загружается артефактом `playwright-report`.
+
+### Контракт API
+
+Репозиторий состоит из трёх npm-пакетов: `spec` (контракт на TypeSpec), `backend` и `frontend`. API описывается
+сначала в `spec/main.tsp`, а код по нему генерируется:
+
+```text
+spec/main.tsp ── tsp compile ──> spec/openapi.yaml (OpenAPI 3.0.0)
+                                  ├── openapi-ts ──> frontend/src/api/generated/  SDK: клиент fetch + TanStack Query
+                                  └── openapi-ts ──> backend/src/api/generated/   типы обработчиков + копия контракта
+```
+
+```bash
+mise run generate        # пересобрать OpenAPI, SDK и типы бэкенда после правки spec/main.tsp
+mise run check:contract  # проверить, что закоммиченное сгенерированное совпадает с контрактом
+```
+
+Генератор `@hey-api/openapi-ts` и его настройки (`spec/openapi-ts.config.ts`) живут в пакете `spec` вместе с
+TypeScript 6: генератору нужен API компилятора TypeScript, которого нет в TypeScript 7 бэкенда и фронтенда.
+Сгенерированные файлы коммитятся и руками не правятся (ADR 0003). Бэкенд отдаёт API под `/api`, а Vite в dev и в
+`vite preview` проксирует `/api` на бэкенд. API-тесты запускают приложение с `validateResponses`: ответ, которого нет
+в контракте, превращается в ошибку 500.
 
 ## Коммиты
 
@@ -70,6 +104,21 @@ feat(backend): add event types endpoint
 fix(frontend): show validation error on booking form
 docs: describe commit conventions
 ```
+
+## Выпуск версий
+
+Версии выпускает [release-please](https://github.com/googleapis/release-please) по сообщениям коммитов. Версия одна
+на весь репозиторий: она хранится в `version.txt`, журнал изменений — в `CHANGELOG.md`. Версии в `package.json`
+пакетов не меняются.
+
+1. После каждого push в `main` workflow `release-please.yml` открывает или обновляет release PR
+   `chore(main): release X.Y.Z`: в нём новая версия и записи журнала.
+2. Слияние release PR создаёт тег `vX.Y.Z` и GitHub Release.
+
+В журнал попадают `feat`, `fix`, `perf` и `revert`, остальные типы скрыты. До `1.0.0` ломающее изменение повышает
+minor-версию, а не major. Первая версия — `0.1.0` (`initial-version` в `release-please-config.json`). Настройки
+лежат в `release-please-config.json` и `.release-please-manifest.json`; манифест после первого релиза ведёт
+release-please, руками его не правим.
 
 ## Сценарии работы
 

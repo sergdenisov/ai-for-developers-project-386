@@ -2,7 +2,7 @@ version: 2
 
 updates:
   - package-ecosystem: npm
-    directories: ['/', '/backend', '/frontend']
+    directories: ['/', '/spec', '/backend', '/frontend']
     schedule:
       interval: weekly
     # Skip freshly published versions: compromised releases are usually caught within days.
@@ -12,8 +12,13 @@ updates:
       prefix: chore
       include: scope
     groups:
+      # In /spec. 0.x with breaking changes in minor versions, pinned to an exact version: update it on its own
+      # and regenerate the SDK and backend types (`mise run generate`).
+      hey-api:
+        patterns: ['@hey-api/openapi-ts']
       npm-minor-and-patch:
         update-types: [minor, patch]
+        exclude-patterns: ['@hey-api/openapi-ts']
     ignore:
       # The major version of @types/node follows Node.js in mise.toml; bump both together by hand.
       - dependency-name: '@types/node'

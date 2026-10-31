@@ -8,3 +8,7 @@ line_length = 120
 [MD033]
 # The collapsible section from the Hexlet README template.
 allowed-elements = ["details", "summary"]
+
+[per-file-ignores]
+# Written by release-please, which puts two blank lines before each section; see AGENTS.md.
+"CHANGELOG.md" = ["MD012"]
