@@ -23,6 +23,10 @@ updates:
       # The major version of @types/node follows Node.js in mise.toml; bump both together by hand.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+      # /spec keeps TypeScript 6 for @hey-api/openapi-ts, which needs the compiler API that TypeScript 7 no longer
+      # ships (AGENTS.md); bump TypeScript majors by hand, together with the generator.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
