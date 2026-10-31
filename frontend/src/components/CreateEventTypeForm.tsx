@@ -8,15 +8,11 @@ import {
   createEventTypeMutation,
   listEventTypesQueryKey,
 } from '../api/generated/@tanstack/react-query.gen.ts';
-import type { CreateEventTypeError, WorkingHours } from '../api/generated/index.ts';
+import type { WorkingHours } from '../api/generated/index.ts';
 import { durationsWithin, formatDuration } from '../duration.ts';
+import { apiErrorOf, requiredMessage, unexpectedMessage } from '../errors.ts';
 
 type Values = { name: string; description: string; durationMinutes: string; id: string };
-
-const required = 'Обязательное поле';
-
-/** Fallback for errors that bring no message from the server, such as a lost connection. */
-const unexpected = 'Что-то пошло не так, попробуйте ещё раз';
 
 /**
  * The Owner's form for a new Event Type. Only required fields are checked here; the server checks the other rules
@@ -28,7 +24,7 @@ export function CreateEventTypeForm({ workingHours }: { workingHours: WorkingHou
 
   const form = useForm<Values>({
     initialValues: { name: '', description: '', durationMinutes: '', id: '' },
-    validate: { name: isNotEmpty(required), durationMinutes: isNotEmpty(required) },
+    validate: { name: isNotEmpty(requiredMessage), durationMinutes: isNotEmpty(requiredMessage) },
   });
 
   const create = useMutation({
@@ -39,8 +35,7 @@ export function CreateEventTypeForm({ workingHours }: { workingHours: WorkingHou
       await queryClient.invalidateQueries({ queryKey: listEventTypesQueryKey() });
     },
     onError: (error) => {
-      // Without a response (a lost connection) the error is not in the contract shape.
-      const { code, message, fields }: Partial<CreateEventTypeError> = error;
+      const { code, message, fields } = apiErrorOf(error);
       // Conflicts concern one field, so they are shown next to it like any other field error.
       if (code === 'EVENT_TYPE_ID_TAKEN') {
         form.setFieldError('id', message);
@@ -49,7 +44,7 @@ export function CreateEventTypeForm({ workingHours }: { workingHours: WorkingHou
       } else if (fields !== undefined) {
         form.setErrors(fields);
       } else {
-        setFormError(message ?? unexpected);
+        setFormError(message ?? unexpectedMessage);
       }
     },
   });

@@ -4,16 +4,12 @@ import { useMutation } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 
 import { createBookingMutation } from '../api/generated/@tanstack/react-query.gen.ts';
-import type { Booking, CreateBookingError, EventType, Slot } from '../api/generated/index.ts';
+import type { Booking, EventType, Slot } from '../api/generated/index.ts';
 import { formatDuration } from '../duration.ts';
+import { apiErrorOf, requiredMessage, unexpectedMessage } from '../errors.ts';
 import { formatSlot } from '../owner-time.ts';
 
 type Values = { guest: { name: string; email: string } };
-
-const required = 'Обязательное поле';
-
-/** Fallback for errors that bring no message from the server, such as a lost connection. */
-const unexpected = 'Что-то пошло не так, попробуйте ещё раз';
 
 /**
  * The Guest's form for a chosen Slot. Only required fields are checked here; the server checks the rest, and its
@@ -41,15 +37,14 @@ export function BookingForm({
 
   const form = useForm<Values>({
     initialValues: { guest: { name: '', email: '' } },
-    validate: { guest: { name: isNotEmpty(required), email: isNotEmpty(required) } },
+    validate: { guest: { name: isNotEmpty(requiredMessage), email: isNotEmpty(requiredMessage) } },
   });
 
   const book = useMutation({
     ...createBookingMutation(),
     onSuccess: onBooked,
     onError: (error) => {
-      // Without a response (a lost connection) the error is not in the contract shape.
-      const { code, message, fields }: Partial<CreateBookingError> = error;
+      const { code, message, fields } = apiErrorOf(error);
       if ((code === 'SLOT_STARTED' || code === 'SLOT_UNAVAILABLE') && message !== undefined) {
         onSlotLost(message);
       } else {
@@ -57,7 +52,7 @@ export function BookingForm({
         form.setErrors(fields ?? {});
         // An error that belongs to no field of the form, such as the start, goes above the button.
         if (fields?.['guest.name'] === undefined && fields?.['guest.email'] === undefined) {
-          setFormError(fields?.startsAt ?? message ?? unexpected);
+          setFormError(fields?.startsAt ?? message ?? unexpectedMessage);
         }
       }
     },

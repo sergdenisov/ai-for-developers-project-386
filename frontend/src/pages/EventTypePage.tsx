@@ -6,9 +6,9 @@ import {
   getEventTypeOptions,
   getOwnerOptions,
 } from '../api/generated/@tanstack/react-query.gen.ts';
-import type { GetEventTypeError } from '../api/generated/index.ts';
 import { BookingFlow } from '../components/BookingFlow.tsx';
 import { formatDuration } from '../duration.ts';
+import { apiErrorOf } from '../errors.ts';
 
 function EventTypeNotFound() {
   return (
@@ -27,8 +27,7 @@ export function EventTypePage() {
   const { data: owner } = useQuery(getOwnerOptions());
   const { data: eventType, error } = useQuery(getEventTypeOptions({ path: { id } }));
 
-  // The error is the parsed `ApiError` body, unless the request did not reach the server at all.
-  const { code, message } = (error ?? {}) as Partial<GetEventTypeError>;
+  const { code, message } = apiErrorOf(error);
   if (code === 'NOT_FOUND') {
     return <EventTypeNotFound />;
   }

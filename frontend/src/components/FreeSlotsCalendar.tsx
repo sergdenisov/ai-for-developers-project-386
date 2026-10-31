@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useId } from 'react';
 
 import { getFreeSlotsOptions } from '../api/generated/@tanstack/react-query.gen.ts';
-import type { FreeSlotsDay, GetFreeSlotsError, Slot } from '../api/generated/index.ts';
+import type { FreeSlotsDay, Slot } from '../api/generated/index.ts';
+import { apiErrorOf } from '../errors.ts';
 import { formatDate, formatTime, zoneLabel } from '../owner-time.ts';
 
 function DaySlots({
@@ -57,8 +58,7 @@ export function FreeSlotsCalendar({
   const { data, error } = useQuery(getFreeSlotsOptions({ path: { id: eventTypeId } }));
 
   if (error !== null) {
-    // The error is the parsed `ApiError` body, unless the request did not reach the server at all.
-    const { message } = error as Partial<GetFreeSlotsError>;
+    const { message } = apiErrorOf(error);
     return <Alert color="red">{message ?? 'Не удалось загрузить свободное время'}</Alert>;
   }
   if (data === undefined) {

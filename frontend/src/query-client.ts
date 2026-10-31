@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 
-import type { ApiError } from './api/generated/index.ts';
+import { apiErrorOf } from './errors.ts';
 
 const maxRetries = 3;
 
@@ -9,8 +9,7 @@ const maxRetries = 3;
  * `ApiError` (`NOT_FOUND`, `VALIDATION_FAILED`...) is the server's final answer and shows at once.
  */
 function shouldRetry(failureCount: number, error: unknown) {
-  // The error is the parsed `ApiError` body, unless the request did not reach the server at all.
-  const { code } = error as Partial<ApiError>;
+  const { code } = apiErrorOf(error);
   return failureCount < maxRetries && (code === undefined || code === 'INTERNAL_ERROR');
 }
 
