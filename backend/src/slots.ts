@@ -7,7 +7,8 @@ import { owner } from './owner.js';
  * current moment comes in as `now`, nothing here reads the system clock or knows about HTTP.
  */
 
-const SLOT_GRID_MINUTES = 15;
+/** The step of the Slot Grid. */
+export const SLOT_GRID_MINUTES = 15;
 
 function minuteOfDay(wallTime: string): number {
   const [hours = 0, minutes = 0] = wallTime.split(':').map(Number);

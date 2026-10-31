@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
 import type { EventType, Guest } from './api/generated/index.js';
-import { checkBooking, type Period, slotEnd } from './slots.js';
+import { owner } from './owner.js';
+import { checkBooking, type Period, SLOT_GRID_MINUTES, slotEnd } from './slots.js';
 
 /** A Booking as the store keeps it: moments as `Date`, formatted only in the response. */
 export type StoredBooking = Period & {
@@ -37,10 +38,21 @@ export function trimGuest(body: unknown) {
   }
 }
 
+const pluralRules = new Intl.PluralRules('ru');
+
+/** A count with its noun in the form Russian needs after the number: `1 день`, `3 дня`, `14 дней`. */
+function count(value: number, forms: { one: string; few: string; many: string }): string {
+  const form = pluralRules.select(value);
+  return `${value} ${form === 'one' || form === 'few' ? forms[form] : forms.many}`;
+}
+
+const gridStep = count(SLOT_GRID_MINUTES, { one: 'минуту', few: 'минуты', many: 'минут' });
+const windowDays = count(owner.bookingWindowDays, { one: 'день', few: 'дня', many: 'дней' });
+
 const startMessages = {
-  'off-grid': 'Начало должно быть на сетке слотов: каждые 15 минут от начала рабочего дня',
+  'off-grid': `Начало должно быть на сетке слотов: каждые ${gridStep} от начала рабочего дня`,
   'outside-working-hours': 'Запись должна целиком уложиться в рабочие часы',
-  'after-window': 'Записаться можно только на ближайшие 14 дней',
+  'after-window': `Записаться можно только на ближайшие ${windowDays}`,
 } as const;
 
 /**
