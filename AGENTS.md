@@ -77,8 +77,9 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 - `spec/openapi.yaml`, `backend/src/api/generated/` and `frontend/src/api/generated/` are generated from
   `spec/main.tsp`; change them only with `mise run generate`.
 - `CHANGELOG.md`, `version.txt` and `.release-please-manifest.json` are written by release-please from commit messages.
-  `CHANGELOG.md` is exempt from rumdl MD012 and from typos (short commit hashes read as misspellings), and the
-  manifest from oxfmt (release-please writes it on one line).
+  `CHANGELOG.md` is exempt from rumdl MD012 and from typos (short commit hashes read as misspellings), its compare
+  links from lychee (their tag exists only after the release PR is merged), and the manifest from oxfmt
+  (release-please writes it on one line).
 
 ## Commits
 
