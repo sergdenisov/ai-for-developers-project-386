@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/sergdenisov/ai-for-developers-project-386/compare/v0.1.0...v0.2.0) (2026-11-04)
+
+
+### Features
+
+* **backend:** serve the built frontend next to the API ([3e87960](https://github.com/sergdenisov/ai-for-developers-project-386/commit/3e87960522296202502f8a66d9e76a6b3e2a2451))
+* run the app in one Docker image ([7c0774c](https://github.com/sergdenisov/ai-for-developers-project-386/commit/7c0774c1784e779100ea507db73c1b0be279d8f6))
+
 ## 0.1.0 (2026-10-31)
 
 
