@@ -84,9 +84,14 @@ description = "Scan the git history for committed secrets"
 run = "betterleaks git --redact --no-banner"
 
 # lychee skips frontend/index.html: its root-relative paths (/favicon.svg) are served by Vite from frontend/public.
+# It also skips this repository's compare links: release-please writes one into CHANGELOG.md for a tag that exists
+# only after its release PR is merged. Excluding them was a human decision (see AGENTS.md).
 [tasks."check:network"]
 description = "Checks that need the network: known vulnerabilities in lockfiles, broken links"
-run = ["osv-scanner scan source -r .", "lychee --no-progress --exclude-path frontend/index.html ."]
+run = [
+  "osv-scanner scan source -r .",
+  'lychee --no-progress --exclude-path frontend/index.html --exclude "^https://github\.com/sergdenisov/ai-for-developers-project-386/compare/v" .',
+]
 
 [tasks."check:contract"]
 description = "Fail if the committed OpenAPI, SDK or backend types differ from what the contract generates"
