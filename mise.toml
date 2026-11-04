@@ -68,11 +68,11 @@ wait_for = ["check:contract"]
 run = ["npm run build --prefix backend", "npm run build --prefix frontend"]
 
 [tasks.start]
-description = "Run the built backend"
+description = "Run the built app: the backend serves the API and the frontend, as in the Docker image"
 dir = "backend"
 depends = ["build"]
 env = { PORT = "{{env.BACKEND_PORT}}" }
-run = "npm start"
+run = "npm start -- --frontend-dir ../frontend/dist"
 
 [tasks."check:hk"]
 description = "Linters and formatters (the same steps as the git hooks)"
@@ -120,9 +120,28 @@ run = ["npm test --prefix backend", "npm test --prefix frontend"]
 
 # Not in `check:project`, so the pre-push hook does not run it; `check` and CI do.
 [tasks."check:e2e"]
-description = "Browser scenarios (Playwright, Chromium) against the built backend and `vite preview`"
+description = "Browser scenarios (Playwright, Chromium) against the built backend, which serves the frontend"
 depends = ["build"]
 run = "npm run test:e2e --prefix frontend"
+
+# Needs a running Docker daemon. Not in `check:project`, so the pre-push hook does not run it; `check` and CI do.
+[tasks."check:docker"]
+description = "Build the Docker image and check that its container serves the app on PORT"
+wait_for = ["check:contract"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+docker build --quiet --tag calendar-check .
+container=$(docker run --detach --env PORT=8080 --publish 127.0.0.1::8080 calendar-check)
+trap 'docker rm --force "$container" > /dev/null' EXIT
+address=$(docker port "$container" 8080/tcp)
+for _ in {1..30}; do
+  curl --silent --output /dev/null "http://$address/api/owner" && break
+  sleep 1
+done
+curl --fail --silent --show-error --output /dev/null "http://$address/api/owner"
+curl --fail --silent --show-error "http://$address/book" | grep --quiet 'id="root"'
+"""
 
 [tasks."check:project"]
 description = "Whole-project checks: generated contract code, types, unused code, tests"
@@ -130,7 +149,14 @@ depends = ["check:contract", "check:types", "check:unused", "check:test"]
 
 [tasks.check]
 description = "Run every check (CI runs the same command)"
-depends = ["check:hk", "check:secrets", "check:network", "check:project", "check:e2e"]
+depends = [
+  "check:hk",
+  "check:secrets",
+  "check:network",
+  "check:project",
+  "check:e2e",
+  "check:docker",
+]
 
 [tasks.fix]
 description = "Apply safe autofixes"

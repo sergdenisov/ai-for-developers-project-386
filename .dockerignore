@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+**/test-results
+**/playwright-report
+.claude
+.env
+.env.*
+.git
+.github
+.idea
+.rumdl_cache
+docs
+spec
