@@ -7,6 +7,9 @@
 Учебный проект Хекслета: <https://ru.hexlet.io/programs/ai-for-developers>
 Как это должно работать: <https://files.hexlet.app/a/2ipc5m>
 
+**Приложение:** <https://call-booking-50q8.onrender.com> (бесплатный тариф: первый запрос после простоя будит сервис
+около минуты)
+
 ## Стек
 
 - **Контракт API:** TypeSpec → OpenAPI → клиентский SDK (`@hey-api/openapi-ts`)
@@ -97,6 +100,12 @@ TypeScript 6: генератору нужен API компилятора TypeScr
 docker build --tag calendar .
 docker run --rm --env PORT=8080 --publish 8080:8080 calendar   # http://localhost:8080
 ```
+
+### Render
+
+Приложение опубликовано на [Render](https://render.com/) как Docker-сервис `call-booking` на бесплатном тарифе в
+регионе Frankfurt: <https://call-booking-50q8.onrender.com>. Render собирает образ из `Dockerfile`, сам задаёт `PORT`
+и выкатывает каждый коммит в `main`.
 
 ### Хранение данных
 
