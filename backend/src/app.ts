@@ -6,6 +6,7 @@ import specification from './api/generated/openapi.json' with { type: 'json' };
 import { createBookingStore, type StoredBooking, trimGuest } from './bookings.js';
 import { addErrorHandling, apiError, validationFailed } from './errors.js';
 import { createEventTypeStore, trimEventTypeName } from './event-types.js';
+import { serveFrontend } from './frontend.js';
 import { formatOwnerInstant } from './owner-time.js';
 import { owner } from './owner.js';
 import { addResponseValidation } from './response-validation.js';
@@ -17,6 +18,8 @@ export type AppOptions = {
   validateResponses?: boolean;
   /** The clock: the current moment. Tests pass a fixed one they can move; the default is the system clock. */
   now?: () => Date;
+  /** The absolute path of the built frontend to serve next to the API; without it only the API is served. */
+  frontendDir?: string;
 };
 
 /** The `404 NOT_FOUND` body for an Event Type id that names none. */
@@ -38,6 +41,7 @@ export function buildApp({
   logger = false,
   validateResponses = false,
   now = () => new Date(),
+  frontendDir,
 }: AppOptions = {}) {
   const fastify = Fastify({
     logger,
@@ -140,6 +144,10 @@ export function buildApp({
 
   // Routes and request validation come from the contract; the contract paths have no prefix.
   fastify.register(openapiGlue, { specification, serviceHandlers, prefix: '/api' });
+
+  if (frontendDir !== undefined) {
+    serveFrontend(fastify, frontendDir);
+  }
 
   return fastify;
 }
