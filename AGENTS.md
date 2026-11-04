@@ -38,14 +38,24 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 - Run `mise run check` before you call a change done. It runs every check, the browser scenarios included, and it
   must pass: CI runs the same command. The pre-push hook runs only `check:project`, without the browser scenarios.
 - `mise run check:e2e` builds both packages and runs the Playwright scenarios in `frontend/e2e/` (Chromium) against
-  the built backend started with `--validate-responses` and `vite preview`, on ports of their own
+  the built backend started with `--validate-responses` and `--frontend-dir`, on a port of its own
   (`frontend/playwright.config.ts`), so the dev daemons can stay up.
+- `mise run check:docker` builds the image from `Dockerfile` and checks that a container serves the app on `PORT`. It
+  needs a running Docker daemon.
 - Browser scenarios talk to the real server only: no `page.route`, no mocked responses. One server serves the whole
   run, so a scenario creates Event Types with unique names and ids, never assumes an empty list, and picks its day
   from the calendar, because time is real.
 - Run `mise run fix` for safe autofixes (formatting, Markdown, lint fixes).
 - Tool versions are pinned in `mise.toml`; git hooks are defined in `hk.pkl`.
 - Do not bypass hooks with `--no-verify`.
+
+## Production
+
+- One process serves the API and the built frontend: `Dockerfile` starts the backend with `--frontend-dir`, on the port
+  from `PORT`. `backend/src/frontend.ts` answers every other `GET` page with `index.html`.
+- The app runs on Render as a Docker web service that deploys from `main`. Data lives in memory, so run one instance
+  only: a second one would not see the Bookings of the first, and the ban on overlaps would not hold.
+- Never commit keys or tokens. Render MCP signs in with OAuth; see "Деплой" in `README.md`.
 
 ## Dev servers
 

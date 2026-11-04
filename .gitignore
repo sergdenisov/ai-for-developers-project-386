@@ -3,3 +3,6 @@ node_modules
 dist
 # Agent worktrees (Claude Code)
 .claude/worktrees/
+# Local secrets; the repository keeps none (see "Деплой" in README.md).
+.env
+.env.*
