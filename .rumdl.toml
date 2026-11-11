@@ -10,5 +10,6 @@ line_length = 120
 allowed-elements = ["details", "summary"]
 
 [per-file-ignores]
-# Written by release-please, which puts two blank lines before each section; see AGENTS.md.
+# Exception, human decision in https://github.com/sergdenisov/ai-for-developers-project-386/pull/33: written by
+# release-please, which puts two blank lines before each section.
 "CHANGELOG.md" = ["MD012"]

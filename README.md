@@ -8,7 +8,8 @@
 Как это должно работать: <https://files.hexlet.app/a/2ipc5m>
 
 **Приложение:** <https://call-booking-50q8.onrender.com> (бесплатный тариф: первый запрос после простоя будит сервис
-около минуты)
+около минуты). Данные живут в памяти и пропадают при перезапуске, поэтому сначала создайте тип события в
+[«Админке»](https://call-booking-50q8.onrender.com/admin), а потом записывайтесь на него.
 
 ## Стек
 
@@ -33,6 +34,20 @@ git clone https://github.com/sergdenisov/ai-for-developers-project-386.git
 cd ai-for-developers-project-386
 mise install   # инструменты, а через хук postinstall — npm-зависимости и git-хуки
 ```
+
+### Агенты
+
+Скиллы, которыми сделан проект (`/wayfinder`, `/to-spec`, `/to-tickets`, `/implement-spec`, `/tdd`, `/code-review` и
+другие), — плагин [`mattpocock-skills`](https://github.com/mattpocock/skills). `.claude/settings.json` включает его
+вместе с плагином Render, и Claude Code предлагает поставить оба при первом открытии проекта. Вручную:
+
+```text
+/plugin install mattpocock-skills@claude-plugins-official
+/reload-plugins
+```
+
+Настройки скиллов для этого репозитория (трекер задач, метки, документы домена) лежат в `docs/agents/`, правила для
+агентов — в `AGENTS.md`.
 
 ### Разработка
 
