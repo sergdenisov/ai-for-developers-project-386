@@ -43,11 +43,10 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
 
       # Also installs Chromium (`playwright install chromium`); on a cache hit there is nothing to download.
+      # The runner image already has every library Chromium needs, so there is no `--with-deps`: on these images it
+      # only added fonts for CJK and Thai scripts, which the scenarios never show, from an apt mirror that could
+      # stall the job for many minutes. Should an image lack a library, Chromium fails to start and names it.
       - run: mise run install
-
-      # The system libraries Chromium needs are not cached; the browser itself is already installed.
-      - name: Install Chromium system dependencies
-        run: npm exec --prefix frontend -- playwright install --with-deps chromium
 
       - name: Check commit messages
         env:
