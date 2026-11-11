@@ -12,8 +12,7 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 - Design first: change the API in `spec/main.tsp`, run `mise run generate` and commit the regenerated files with
   the change. It compiles `spec/openapi.yaml` (OpenAPI 3.0.0) and generates from it, with `@hey-api/openapi-ts`,
   the frontend SDK and the backend handler types.
-- The generator and its config (`spec/openapi-ts.config.ts`) live in the `spec` package with TypeScript 6: it needs
-  the TypeScript compiler API, which TypeScript 7 in `backend` and `frontend` does not ship.
+- The generator lives in the `spec` package with TypeScript 6; `spec/openapi-ts.config.ts` says why.
 - Contract paths have no prefix; the backend serves them under `/api` (`fastify-openapi-glue`).
 - Backend: implement an operation in the `RouteHandlers` object in `backend/src/app.ts`; glue registers its route
   and validates requests from `backend/src/api/generated/openapi.json`.
@@ -37,9 +36,8 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 
 - Run `mise run check` before you call a change done. It runs every check, the browser scenarios included, and it
   must pass: CI runs the same command. The pre-push hook runs only `check:project`, without the browser scenarios.
-- `mise run check:e2e` builds both packages and runs the Playwright scenarios in `frontend/e2e/` (Chromium) against
-  the built backend started with `--validate-responses` and `--frontend-dir`, on a port of its own
-  (`frontend/playwright.config.ts`), so the dev daemons can stay up.
+- `mise run check:e2e` builds both packages and runs the Playwright scenarios in `frontend/e2e/` against the built
+  backend (`frontend/playwright.config.ts`); the dev daemons can stay up.
 - `mise run check:docker` builds the image from `Dockerfile` and checks that a container serves the app on `PORT`. It
   needs a running Docker daemon.
 - Browser scenarios talk to the real server only: no `page.route`, no mocked responses. One server serves the whole
@@ -66,8 +64,8 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 ## Rules and exceptions
 
 - Never disable a lint rule or weaken a check to get a change through.
-- An exception is narrow (one path and one rule), carries a reason in the config, and needs a human decision.
-  Exceptions that hide a security finding also get a review date.
+- An exception is narrow (one path and one rule), carries its reason in a comment next to it, and needs a human
+  decision. Exceptions that hide a security finding also get a review date.
 
 ## Files you do not edit by hand
 
@@ -77,9 +75,6 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 - `spec/openapi.yaml`, `backend/src/api/generated/` and `frontend/src/api/generated/` are generated from
   `spec/main.tsp`; change them only with `mise run generate`.
 - `CHANGELOG.md`, `version.txt` and `.release-please-manifest.json` are written by release-please from commit messages.
-  `CHANGELOG.md` is exempt from rumdl MD012 and from typos (short commit hashes read as misspellings), its compare
-  links from lychee (their tag exists only after the release PR is merged), and the manifest from oxfmt
-  (release-please writes it on one line).
 
 ## Commits
 

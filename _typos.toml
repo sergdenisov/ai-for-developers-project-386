@@ -1,4 +1,5 @@
 [files]
-# Written by release-please from commit subjects and links with
-# short commit hashes, which typos reads as misspellings (e.g. `ee0f5ba`); see AGENTS.md.
+# Exception, human decision in https://github.com/sergdenisov/ai-for-developers-project-386/pull/33: written by
+# release-please from commit subjects and links with short commit hashes, which typos reads as misspellings
+# (e.g. `ee0f5ba`).
 extend-exclude = ["CHANGELOG.md"]
