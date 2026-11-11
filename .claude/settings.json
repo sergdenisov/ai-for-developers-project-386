@@ -1,5 +1,6 @@
 {
   "enabledPlugins": {
-    "render@claude-plugins-official": true
+    "render@claude-plugins-official": true,
+    "mattpocock-skills@claude-plugins-official": true
   }
 }
