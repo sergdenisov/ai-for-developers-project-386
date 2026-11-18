@@ -1,0 +1,10 @@
+# Passed to osv-scanner with --config (mise.toml, check:network): without it, a config applies only to the lockfile in
+# its own directory.
+
+# Exception, human decision in https://github.com/sergdenisov/ai-for-developers-project-386/pull/51, review by
+# 2026-12-18: picomatch <= 4.0.7 has a ReDoS through repeated extglobs and no fixed version yet. It is a dev
+# dependency only (vitest, vite, knip), and the globs it parses come from our own configs, not from users.
+[[IgnoredVulns]]
+id = "GHSA-fc5q-39xc-vjpf"
+ignoreUntil = 2026-12-18
+reason = "Dev-only picomatch, globs from our own configs; no fixed version yet (see the comment above)"

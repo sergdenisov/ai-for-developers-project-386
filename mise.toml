@@ -90,7 +90,7 @@ run = "betterleaks git --redact --no-banner"
 [tasks."check:network"]
 description = "Checks that need the network: known vulnerabilities in lockfiles, broken links"
 run = [
-  "osv-scanner scan source -r .",
+  "osv-scanner scan source -r --config osv-scanner.toml .",
   'lychee --no-progress --exclude-path frontend/index.html --exclude "^https://github\.com/sergdenisov/ai-for-developers-project-386/compare/v" .',
 ]
 
