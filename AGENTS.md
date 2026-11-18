@@ -51,8 +51,10 @@ Vite, Mantine) are separate npm packages; the root `package.json` holds reposito
 
 - One process serves the API and the built frontend: `Dockerfile` starts the backend with `--frontend-dir`, on the port
   from `PORT`. `backend/src/frontend.ts` answers every other `GET` page with `index.html`.
-- The app runs on Render as a Docker web service that deploys from `main`. Data lives in memory, so run one instance
-  only: a second one would not see the Bookings of the first, and the ban on overlaps would not hold.
+- The app runs on Render as a Docker web service that deploys from `main` of
+  `sergdenisov/ai-for-developers-project-387`, where the app moved; commits here are no longer deployed. Data lives in
+  memory, so run one instance only: a second one would not see the Bookings of the first, and the ban on overlaps
+  would not hold.
 - Never commit keys or tokens. Render MCP signs in with OAuth; see "Деплой" in `README.md`.
 
 ## Dev servers
