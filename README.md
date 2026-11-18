@@ -11,6 +11,9 @@
 около минуты). Данные живут в памяти и пропадают при перезапуске, поэтому сначала создайте тип события в
 [«Админке»](https://call-booking-50q8.onrender.com/admin), а потом записывайтесь на него.
 
+Приложение перенесено в [`ai-for-developers-project-387`](https://github.com/sergdenisov/ai-for-developers-project-387),
+и Render выкатывает его оттуда. Здесь остаются спецификация, тикеты и решения первого проекта.
+
 ## Стек
 
 - **Контракт API:** TypeSpec → OpenAPI → клиентский SDK (`@hey-api/openapi-ts`)
@@ -119,8 +122,10 @@ docker run --rm --env PORT=8080 --publish 8080:8080 calendar   # http://localhos
 ### Render
 
 Приложение опубликовано на [Render](https://render.com/) как Docker-сервис `call-booking` на бесплатном тарифе в
-регионе Frankfurt: <https://call-booking-50q8.onrender.com>. Render собирает образ из `Dockerfile`, сам задаёт `PORT`
-и выкатывает каждый коммит в `main`.
+регионе Frankfurt: <https://call-booking-50q8.onrender.com>. Render собирает образ из `Dockerfile` и сам задаёт `PORT`.
+Сервис деплоится из `main` репозитория
+[`ai-for-developers-project-387`](https://github.com/sergdenisov/ai-for-developers-project-387), куда перенесено
+приложение; коммиты в `main` этого репозитория больше не выкатываются.
 
 ### Хранение данных
 
